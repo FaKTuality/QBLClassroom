@@ -13,7 +13,7 @@ import { Home } from "./Components/Home";
 import { NavigationTutor } from "./Components/NavigationTutor";
 import { NavigationStudent } from "./Components/NavStudent";
 import { NavigationAuth } from "./Components/NavAuth";
-import { ClassRoom } from "./Components/classRoom";
+import { ClassRoom } from "./Components/ClassRoom.jsx";
 import { AccessRestricted } from "./Components/accessRestricted";
 import  Settings  from './Components/Settings'
 import { Students } from "./Components/Students";
@@ -22,7 +22,7 @@ import { getDoc, doc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { changeName, changeTopic } from "./store/topicConfigSlice";
 import { db } from "../Firebase/index.js";
-import RemoveAds from "./Components/removeAds.jsx";
+import RemoveAds from "./Components/RemoveAds.jsx";
 import { auth } from "../Firebase/index.js";
 import { useAuth } from "./store/authProvider";
 import './App.css'
