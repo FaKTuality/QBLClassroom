@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@panva/jose": "jsr:@panva/jose@^6.2.10"
+  }
+}
