@@ -208,7 +208,7 @@ Deno.serve(async (req) => {
 
 
         const userResponse = await fetch(
-          `${FIRESTORE_BASE}/users/${uid}?transaction=${encodeURIComponent(
+          `${FIRESTORE_BASE}/admin/${uid}?transaction=${encodeURIComponent(
             transactionId
           )}`,
           {
@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
 
         if (!userResponse.ok) {
           throw new Error(
-            `User ${uid} does not exist.`
+            `Tutor ${uid} does not exist.`
           );
         }
 
@@ -245,8 +245,8 @@ Deno.serve(async (req) => {
         const reference =
           transaction.reference;
 
-        const userDocumentName =
-          `${FIRESTORE_BASE}/users/${uid}`;
+        const tutorDocumentName =
+          `${FIRESTORE_BASE}/admin/${uid}`;
 
         const paymentDocumentName =
           `${FIRESTORE_BASE}/payments/${reference}`;
@@ -270,7 +270,7 @@ Deno.serve(async (req) => {
               writes: [
                 {
                   update: {
-                    name: userDocumentName,
+                    name: tutorDocumentName,
 
                     fields: {
                       ...user.fields,

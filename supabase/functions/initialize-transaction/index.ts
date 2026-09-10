@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
     const { access_token } = await tokenResponse.json();
 
     const userResponse = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${uid}`,
+      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/admin/${uid}`,
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -114,13 +114,27 @@ Deno.serve(async (req) => {
       }
     );
 
-    const user = await userResponse.json();
+    const tutor = await userResponse.json();
 
-    if (!user.name) {
-      return new Response("User account was not found.", {
+    if (!tutor.fields?.name) {
+      return new Response("tutor account was not found.", {
         status: 404,
       });
     }
+
+    if (tutor.fields?.hasAdFree?.booleanValue === true) {
+  return new Response(
+    JSON.stringify({
+      error: "Ads have already been removed for this account.",
+    }),
+    {
+      status: 409,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
 
     const paystackResponse = await fetch(
       "https://api.paystack.co/transaction/initialize",

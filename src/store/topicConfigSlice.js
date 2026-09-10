@@ -22,7 +22,8 @@ const initialState = {
   savedConfiguration: null, 
   error: null,
   changedNames: {},
-  changedTopics: {}
+  changedTopics: {}, 
+  hasAdFree: null, 
 }
 const topicConfig = createSlice({
   name: "topicConfig",
@@ -36,6 +37,10 @@ const topicConfig = createSlice({
 
     changeTopic: (initialState, { payload: changeTopicsPayload }) => {
       initialState.changedTopics = changeTopicsPayload
+    }, 
+
+    setAdFreeStatus: (initialState, { payload: adFreeStatus}) => {
+      initialState.hasAdFree = adFreeStatus; 
     }
   },
 
@@ -56,4 +61,4 @@ const topicConfig = createSlice({
 
 export default topicConfig.reducer;
 
-export const { changeName, changeTopic } = topicConfig.actions
+export const { changeName, changeTopic, setAdFreeStatus } = topicConfig.actions

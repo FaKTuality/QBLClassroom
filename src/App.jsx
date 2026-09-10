@@ -20,9 +20,9 @@ import { Students } from "./Components/Students";
 import { useEffect, useState } from "react";
 import { getDoc, doc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
-import { changeName, changeTopic } from "./store/topicConfigSlice";
+import { changeName, changeTopic, setAdFreeStatus } from "./store/topicConfigSlice";
 import { db } from "../Firebase/index.js";
-import RemoveAds from "./Components/RemoveAds.jsx";
+import RemoveAds from "./Components/AdsRemove.jsx";
 import { auth } from "../Firebase/index.js";
 import { useAuth } from "./store/authProvider";
 import './App.css'
@@ -84,15 +84,16 @@ const App = () => {
           const { tutorId } = docSnap2.data() || {}
           if(tutorId) {
             const docSnap3 = await getDoc(doc(db, "admin", tutorId))
-            const { changedTopics } = docSnap3.data() || {}
-            
+            const { changedTopics, hasAdFree } = docSnap3.data() || {}
+            dispatch(setAdFreeStatus(hasAdFree))
             dispatch(changeTopic(changedTopics))
             console.log("I have dispatched changed topics for the student", changedTopics)
           }
         } else {
-          const { changedNames, changedTopics } = docSnap.data() || {}
-          dispatch(changeName(changedNames))
-          dispatch(changeTopic(changedTopics))
+          const { changedNames, changedTopics, hasAdFree } = docSnap.data() || {};
+          dispatch(setAdFreeStatus(hasAdFree));
+          dispatch(changeName(changedNames));
+          dispatch(changeTopic(changedTopics));
         }
 
       } catch(e) {
