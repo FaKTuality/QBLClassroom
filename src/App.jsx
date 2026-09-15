@@ -72,7 +72,6 @@ const App = () => {
     const fetchChangedNames = async () => {
       console.log("running effect function")
       try {
-        console.log(user); 
         const docRef = doc(db, "admin", user.uid)
         
         const docRef2 = doc(db, "users", user.uid)
@@ -125,7 +124,9 @@ const App = () => {
         <Route path="signin" element={<SignIn />} />   
       </Route>
 
-      <Route path="/" element={<Home />} />   
+      <Route path="/" element={<NavigationAuth />} >
+        <Route index element={<Home />}/>
+      </Route>   
       <Route  path="/navstu" element={<NavigationStudent />} >     
       <Route path="settings" element={<Settings />} />   
         <Route path="studentdashboard" element={<StudentDashboard />} />

@@ -8,6 +8,13 @@ const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID");
 const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
 
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://qbl-classroom.vercel.app",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 if (!key) {
   throw new Error("SERVICE_ACCOUNT_PRIVATE_KEY is not set.");
 }
@@ -16,6 +23,8 @@ const privateKey = await importPKCS8(key, "RS256");
 
 const FIRESTORE_BASE =
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+const FIRESTORE_DOC_BASE =`projects/${PROJECT_ID}/databases/(default)/documents`;   
 
 
 async function getFirestoreAccessToken() {
@@ -106,6 +115,14 @@ function signaturesMatch(a: string, b: string) {
 
 
 Deno.serve(async (req) => {
+
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   try {
     const signature =
       req.headers.get("x-paystack-signature");
@@ -113,7 +130,7 @@ Deno.serve(async (req) => {
     if (!signature) {
       return new Response(
         "Missing Paystack signature.",
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -135,7 +152,7 @@ Deno.serve(async (req) => {
 
       return new Response(
         "Invalid webhook signature.",
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -246,10 +263,10 @@ Deno.serve(async (req) => {
           transaction.reference;
 
         const tutorDocumentName =
-          `${FIRESTORE_BASE}/admin/${uid}`;
+          `${FIRESTORE_DOC_BASE}/admin/${uid}`;
 
         const paymentDocumentName =
-          `${FIRESTORE_BASE}/payments/${reference}`;
+          `${FIRESTORE_DOC_BASE}/payments/${reference}`;
 
         /*
          * Commit both writes atomically.
@@ -361,6 +378,7 @@ Deno.serve(async (req) => {
         status: 200,
         headers: {
           "Content-Type": "application/json",
+          ...corsHeaders
         },
       }
     );
@@ -372,7 +390,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       "Webhook processing failed.",
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 });

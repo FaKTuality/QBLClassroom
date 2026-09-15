@@ -8,6 +8,7 @@ const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_REF;
 
 const SUPABASE_FUNCTION_URL =
   `https://${PROJECT_REF}.supabase.co/functions/v1`;
+  // https://groobjilaxzmbnveyjux.supabase.co/functions/v1/initialize-transaction
 
 export default function RemoveAds() {
   const dispatch = useDispatch();
@@ -169,7 +170,7 @@ export default function RemoveAds() {
    */
   if (reference && loading) {
     return (
-      <div className="loader-container">
+      <div className="loader-container flex-vert">
         <RevolvingDot
           visible={true}
           height="80"
@@ -249,7 +250,7 @@ export default function RemoveAds() {
         )}
 
         <button
-          className="remove-ads-button"
+          className="auth-button"
           onClick={handleRemoveAds}
           disabled={loading}
         >

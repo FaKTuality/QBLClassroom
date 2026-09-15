@@ -7,6 +7,14 @@ import {
   type JWTPayload,
 } from "jose";
 
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://qbl-classroom.vercel.app",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 const key = Deno.env.get("SERVICE_ACCOUNT_PRIVATE_KEY");
 const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID");
 
@@ -130,12 +138,24 @@ async function getFirestoreAccessToken(): Promise<string> {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+    if (req.method === "OPTIONS") {
+    return new Response(JSON.stringify({
+      error: "ok",
+    }), {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   try {
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response("Unauthorized.", {
+      return new Response(JSON.stringify({
+      error: "Unauthorized.",
+    }), {
         status: 401,
+        headers: corsHeaders
       });
     }
 
@@ -148,8 +168,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const email = decodedToken.email;
 
     if (!uid || !email) {
-      return new Response("Invalid authentication token.", {
+      return new Response(JSON.stringify({
+      error: "Invalid authentication token.",
+    }), {
         status: 401,
+        headers: corsHeaders
       });
     }
 
@@ -165,6 +188,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
+            ...corsHeaders
           },
         }
       );
@@ -200,6 +224,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 502,
           headers: {
             "Content-Type": "application/json",
+            ...corsHeaders
           },
         }
       );
@@ -220,6 +245,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
+            ...corsHeaders
           },
         }
       );
@@ -238,6 +264,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 403,
           headers: {
             "Content-Type": "application/json",
+            ...corsHeaders
           },
         }
       );
@@ -252,6 +279,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
+            ...corsHeaders
           },
         }
       );
@@ -422,6 +450,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
             status: 200,
             headers: {
               "Content-Type": "application/json",
+              ...corsHeaders
             },
           }
         );
@@ -550,14 +579,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
         headers: {
           "Content-Type":
             "application/json",
+            ...corsHeaders
         },
       }
     );
   } catch (error: unknown) {
     console.error(error);
 
-    return new Response("Internal server error.", {
+    return new Response(JSON.stringify({
+      error: "Internal server error.",
+    }), {
       status: 500,
+      headers: corsHeaders
     });
   }
 });

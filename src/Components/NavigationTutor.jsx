@@ -103,7 +103,7 @@ const toggleNav = () => {
     <div>
       <img src="../logoMobile.png" className="logo for-mobile"/>
       
-      <div className={`for-mobile overlay ${!openNav && 'hidden'}`}></div>
+      <div onClick={toggleNav} className={`for-mobile overlay ${!openNav && 'hidden'}`}></div>
       <div 
         onClick={toggleNav}
         className={`for-mobile hamburger ${openNav && 'hidden'}`}>

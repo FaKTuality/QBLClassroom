@@ -5,7 +5,15 @@ import {
   decodeProtectedHeader,
   jwtVerify,
 } from "jose";
-// supabase project reference ID: groobjilaxzmbnveyjux
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://qbl-classroom.vercel.app",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+
 const key = Deno.env.get("SERVICE_ACCOUNT_PRIVATE_KEY");
 const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID");
 
@@ -50,11 +58,26 @@ async function verifyFirebaseIdToken(idToken: string) {
 }
 
 Deno.serve(async (req) => {
+
+    if (req.method === "OPTIONS") {
+    return new Response(JSON.stringify({
+      error: "ok",
+    }), {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   try {
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response("Unauthorized.", { status: 401 });
+      return new Response(JSON.stringify({
+      error: "Unauthorized",
+    }), {
+        status: 401,
+        headers: corsHeaders,
+      });
     }
 
     const idToken = authHeader.substring(7);
@@ -65,15 +88,23 @@ Deno.serve(async (req) => {
     const email = decodedToken.email;
 
     if (!uid || !email) {
-      return new Response("Invalid authentication token.", {
+      return new Response(JSON.stringify({
+      error: "Invalid authentication token.",
+    }), {
         status: 401,
+        headers: corsHeaders,
       });
     }
 
     const { product } = await req.json();
 
     if (product !== "AD_FREE") {
-      return new Response("Invalid product.", { status: 400 });
+      return new Response(JSON.stringify({
+      error: "Invalid authentication token.",
+    }), { 
+        status: 400 , 
+        headers: corsHeaders, 
+      });
     }
 
     const signedJWT = await new SignJWT({
@@ -116,10 +147,21 @@ Deno.serve(async (req) => {
 
     const tutor = await userResponse.json();
 
-    if (!tutor.fields?.name) {
-      return new Response("tutor account was not found.", {
-        status: 404,
-      });
+    if (!userResponse.ok) {
+      console.error("Firestore tutor lookup failed:", tutor);
+
+      return new Response(
+        JSON.stringify({
+          error: "Tutor account was not found.",
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     if (tutor.fields?.hasAdFree?.booleanValue === true) {
@@ -131,6 +173,7 @@ Deno.serve(async (req) => {
       status: 409,
       headers: {
         "Content-Type": "application/json",
+        ...corsHeaders, 
       },
     }
   );
@@ -150,6 +193,7 @@ Deno.serve(async (req) => {
           email,
           amount: 5000 * 100,
           currency: "NGN",
+          channels: ["card", "bank", "bank_transfer", "ussd"],
           metadata: {
             firebaseUid: uid,
             product,
@@ -170,6 +214,7 @@ Deno.serve(async (req) => {
           status: 502,
           headers: {
             "Content-Type": "application/json",
+            ...corsHeaders, 
           },
         }
       );
@@ -183,14 +228,18 @@ Deno.serve(async (req) => {
       {
         headers: {
           "Content-Type": "application/json",
+          ...corsHeaders, 
         },
       }
     );
   } catch (error) {
     console.error(error);
 
-    return new Response("Internal server error.", {
+    return new Response(JSON.stringify({
+      error: "Internal server error.",
+    }), {
       status: 500,
+      headers: corsHeaders, 
     });
   }
 });
