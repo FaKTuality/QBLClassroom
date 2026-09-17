@@ -140,7 +140,7 @@ export const NavigationStudent = ProtRoutes( () => {
       <img src="../logoMobile.png" className="logo for-mobile" />
       
 
-      <div className={`for-mobile overlay ${!openNav && "hidden"}`}></div>
+      <div  onClick={toggleNav} className={`for-mobile overlay ${!openNav && "hidden"}`}></div>
 
       <div
         onClick={toggleNav}
@@ -151,7 +151,7 @@ export const NavigationStudent = ProtRoutes( () => {
 
       <div
         onClick={toggleNav}
-        className={`for-mobile hamburger ${!openNav && "hidden"}`}
+        className={`for-mobile hamburger ${!openNav && "hidden"} close-modal-nav`}
       >
         &times;
       </div>
