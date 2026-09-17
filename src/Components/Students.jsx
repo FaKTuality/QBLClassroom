@@ -177,19 +177,20 @@ export const Students = () => {
                   disabled={student.studentName === "Alex Doe"}
                   onClick={() => handleShowModal({ studentId: student.studentId, studentName: student.studentName })}
                   className={`${showOptions.id === student.studentId && showOptions.show ? 'action' : 'button'}`} 
-                  >remove</button>    
+                  >Remove</button>    
               <button 
                 onClick={() => handleShowModal2({ studentId: student.studentId, studentName: student.studentName })}
                   className=
                   {`${showOptions.id === student.studentId && showOptions.show ? 'action' : 'button'}`} 
                 >Rename</button> 
           </div>
-          {showNotif && <Notif operation="remove-student" setShowNotif={setShowNotif} studentName={student.studentName} />}
-          {showNotif2 && <Notif operation="change-name" setShowNotif={setShowNotif2} studentName={student.studentName} />}
+
           </div>
 
 
         )}
+        {showNotif && <Notif operation="remove-student" setShowNotif={setShowNotif} studentName={studentObj.studentName} />}
+        {showNotif2 && <Notif operation="change-name" setShowNotif={setShowNotif2} studentName={studentObj.studentName} />}
         { showModal && 
         <div className="modal">
           <div className="modal-content">
