@@ -339,7 +339,7 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
 
 
   return createPortal(
-    <div className="modal">
+    <div onClick={closeModal} className="modal">
     
     <Formik
     
