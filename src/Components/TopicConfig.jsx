@@ -349,9 +349,9 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
       onSubmit={deleteTopic ? handleDeleteTopic : deletingQuestion ? handleDelete : addStudent ? handleAddStudent : onSubmit}
     >
         {({ values }) => 
-          <Form className="modal-content list relative">
+          <Form onClick={(e) => e.stopPropagation()} className="modal-content list relative">
             {!deleteTopic && !editing && !addQuestion && !deletingQuestion && !addStudent &&<h4 className="header-centered">Configure your action</h4>}
-            <div onClick={closeModal} className="close-modal">×</div>
+            <div className="close-modal">×</div>
             {!(addQuestion || editing || deleteTopic || addStudent || deletingQuestion) &&
             <div className="label-input-pair-vertical">
               <label htmlFor="topicName">Topic:</label>

@@ -189,14 +189,12 @@ export const Students = () => {
 
 
         )}
-        {showNotif && <Notif operation="remove-student" setShowNotif={setShowNotif} studentName={studentObj.studentName} />}
-        {showNotif2 && <Notif operation="change-name" setShowNotif={setShowNotif2} studentName={studentObj.studentName} />}
+        {showNotif && <Notif operation="remove-student" setShowNotif={setShowNotif} studentName={student.studentName} />}
+        {showNotif2 && <Notif operation="change-name" setShowNotif={setShowNotif2} studentName={student.studentName} />}
         { showModal && 
-        <div className="modal">
-          <div className="modal-content">
-            <div onClick={() => setShowModal(false)} className="close-modal">&times;</div>
-            
-            <h2 className="centered">{`Are you sure you want to remove ${studentObj.studentName}?`}</h2>
+        <div onClick={() => setShowModal(false)} className="modal">
+          <div onClick={(e) => e.stopPropagation()} className="modal-content">
+            <p className="centered">{`Are you sure you want to remove ${studentObj.studentName}?`}</p>
             <button 
               disabled={removing}
               onClick={handleRemove} className="button centered">{removing ? 'removing...' : 'Confirm'}</button>
@@ -204,10 +202,9 @@ export const Students = () => {
         </div>}
     
         { showModal2 && 
-        <div className="modal">
-          <div className="modal-content">
-            <div onClick={() => setShowModal2(false)} className="close-modal">&times;</div>
-            <h2 className="header-centered">Rename {studentObj.studentName}</h2>
+        <div onClick={() => setShowModal2(false)} className="modal">
+          <div onClick={(e) => e.stopPropagation()} className="modal-content">
+            <h4 className="header-centered">Rename {studentObj.studentName}</h4>
             <div className="flex-vert">
             <input 
               className="textInput"
