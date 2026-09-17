@@ -7,7 +7,6 @@ import {
   type JWTPayload,
 } from "jose";
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://qblclassroom.com",
   "Access-Control-Allow-Headers":
@@ -99,7 +98,10 @@ async function getFirestoreAccessToken(): Promise<string> {
   const signedJWT = await new SignJWT({
     scope: "https://www.googleapis.com/auth/datastore",
   })
-    .setProtectedHeader({ alg: "RS256", typ: "JWT" })
+    .setProtectedHeader({
+      alg: "RS256",
+      typ: "JWT",
+    })
     .setIssuer(
       "firebase-adminsdk-fbsvc@joshuaqbl.iam.gserviceaccount.com"
     )
@@ -113,7 +115,8 @@ async function getFirestoreAccessToken(): Promise<string> {
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type":
+          "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         grant_type:
@@ -138,25 +141,31 @@ async function getFirestoreAccessToken(): Promise<string> {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
-    if (req.method === "OPTIONS") {
-    return new Response(JSON.stringify({
-      error: "ok",
-    }), {
-      status: 200,
-      headers: corsHeaders,
-    });
+  if (req.method === "OPTIONS") {
+    return new Response(
+      JSON.stringify({
+        error: "ok",
+      }),
+      {
+        status: 200,
+        headers: corsHeaders,
+      }
+    );
   }
 
   try {
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({
-      error: "Unauthorized.",
-    }), {
-        status: 401,
-        headers: corsHeaders
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized.",
+        }),
+        {
+          status: 401,
+          headers: corsHeaders,
+        }
+      );
     }
 
     const idToken = authHeader.substring(7);
@@ -165,18 +174,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
       await verifyFirebaseIdToken(idToken);
 
     const uid = decodedToken.user_id ?? decodedToken.sub;
-    const email = decodedToken.email;
 
-    if (!uid || !email) {
-      return new Response(JSON.stringify({
-      error: "Invalid authentication token.",
-    }), {
-        status: 401,
-        headers: corsHeaders
-      });
+    if (!uid) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid authentication token.",
+        }),
+        {
+          status: 401,
+          headers: corsHeaders,
+        }
+      );
     }
 
-    const body: { reference?: string } = await req.json();
+    const body: { reference?: string } =
+      await req.json();
+
     const { reference } = body;
 
     if (!reference) {
@@ -188,7 +201,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders
+            ...corsHeaders,
           },
         }
       );
@@ -224,7 +237,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 502,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders
+            ...corsHeaders,
           },
         }
       );
@@ -245,7 +258,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders
+            ...corsHeaders,
           },
         }
       );
@@ -264,7 +277,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 403,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders
+            ...corsHeaders,
           },
         }
       );
@@ -279,7 +292,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders
+            ...corsHeaders,
           },
         }
       );
@@ -291,27 +304,41 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const accessToken =
       await getFirestoreAccessToken();
 
-    /*
-     * Perform the user entitlement update and payment record
-     * atomically in a Firestore transaction.
-     */
     const FIRESTORE_BASE =
       `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-    const FIRESTORE_DOC_BASE =`projects/${PROJECT_ID}/databases/(default)/documents`;      
+    const FIRESTORE_DOC_BASE =
+      `projects/${PROJECT_ID}/databases/(default)/documents`;
 
     const paymentDocumentUrl =
-      `${FIRESTORE_DOC_BASE}/payments/${encodeURIComponent(reference)}`;
+      `${FIRESTORE_DOC_BASE}/payments/${encodeURIComponent(
+        reference
+      )}`;
 
     const tutorDocumentUrl =
-      `${FIRESTORE_DOC_BASE}/admin/${encodeURIComponent(uid)}`;
+      `${FIRESTORE_DOC_BASE}/admin/${encodeURIComponent(
+        uid
+      )}`;
+
+    /*
+     * Payment entitlement is now stored separately from
+     * the publicly readable tutor document.
+     */
+    const paymentPrivateDocumentUrl =
+      `${FIRESTORE_DOC_BASE}/admin/${encodeURIComponent(
+        uid
+      )}/payment/private`;
 
     const transactionTimestamp =
       new Date().toISOString();
 
     let committed = false;
 
-    for (let attempt = 0; attempt < 3 && !committed; attempt++) {
+    for (
+      let attempt = 0;
+      attempt < 3 && !committed;
+      attempt++
+    ) {
       /*
        * Begin the Firestore transaction.
        */
@@ -341,8 +368,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         await beginResponse.json();
 
       /*
-       * Read the payment document and user document
-       * within the transaction.
+       * Read the payment record, private entitlement
+       * document, and tutor document within the transaction.
        */
       const batchGetResponse = await fetch(
         `${FIRESTORE_BASE}:batchGet`,
@@ -357,6 +384,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           body: JSON.stringify({
             documents: [
               paymentDocumentUrl,
+              paymentPrivateDocumentUrl,
               tutorDocumentUrl,
             ],
             transaction: transactionId,
@@ -370,14 +398,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
+              Authorization:
+                `Bearer ${accessToken}`,
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               transaction: transactionId,
             }),
           }
-        );        
+        );
+
         throw new Error(
           "Could not read Firestore documents."
         );
@@ -387,16 +418,28 @@ Deno.serve(async (req: Request): Promise<Response> => {
         await batchGetResponse.json();
 
       let paymentExists = false;
+      let paymentPrivateExists = false;
       let tutorExists = false;
 
       for (const result of documents) {
-        if (result.found?.name ===
-          paymentDocumentUrl) {
+        if (
+          result.found?.name ===
+          paymentDocumentUrl
+        ) {
           paymentExists = true;
         }
 
-        if (result.found?.name ===
-          tutorDocumentUrl) {
+        if (
+          result.found?.name ===
+          paymentPrivateDocumentUrl
+        ) {
+          paymentPrivateExists = true;
+        }
+
+        if (
+          result.found?.name ===
+          tutorDocumentUrl
+        ) {
           tutorExists = true;
         }
       }
@@ -407,14 +450,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
+              Authorization:
+                `Bearer ${accessToken}`,
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               transaction: transactionId,
             }),
           }
-        );          
+        );
+
         throw new Error(
           "User account was not found."
         );
@@ -432,8 +478,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
+              Authorization:
+                `Bearer ${accessToken}`,
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               transaction: transactionId,
@@ -444,20 +492,23 @@ Deno.serve(async (req: Request): Promise<Response> => {
         return new Response(
           JSON.stringify({
             success: true,
-            message: "Payment was already processed.",
+            message:
+              "Payment was already processed.",
           }),
           {
             status: 200,
             headers: {
-              "Content-Type": "application/json",
-              ...corsHeaders
+              "Content-Type":
+                "application/json",
+              ...corsHeaders,
             },
           }
         );
       }
 
       /*
-       * Commit both writes atomically.
+       * Commit the entitlement and payment record
+       * atomically.
        */
       const commitResponse = await fetch(
         `${FIRESTORE_BASE}:commit`,
@@ -475,57 +526,93 @@ Deno.serve(async (req: Request): Promise<Response> => {
             writes: [
               {
                 update: {
-                  name: tutorDocumentUrl,
+                  name:
+                    paymentPrivateDocumentUrl,
+
                   fields: {
                     hasAdFree: {
                       booleanValue: true,
                     },
+
                     adFreePurchasedAt: {
                       timestampValue:
                         transactionTimestamp,
                     },
-                  },
-                },
 
-                updateMask: {
-                  fieldPaths: [
-                    "hasAdFree",
-                    "adFreePurchasedAt",
-                  ],
+                    lastPaystackReference: {
+                      stringValue:
+                        transaction.reference,
+                    },
+
+                    lastPaystackTransactionId: {
+                      integerValue:
+                        String(transaction.id),
+                    },
+
+                    lastAmount: {
+                      integerValue:
+                        String(transaction.amount),
+                    },
+
+                    lastCurrency: {
+                      stringValue:
+                        transaction.currency,
+                    },
+
+                    status: {
+                      stringValue: "paid",
+                    },
+
+                    product: {
+                      stringValue:
+                        transaction.metadata
+                          .product,
+                    },
+                  },
                 },
               },
 
               {
                 update: {
-                  name: paymentDocumentUrl,
+                  name:
+                    paymentDocumentUrl,
+
                   fields: {
-                    firebaseUid: {
+                    uid: {
                       stringValue: uid,
                     },
-                    reference: {
+
+                    paystackReference: {
                       stringValue:
                         transaction.reference,
                     },
-                    transactionId: {
+
+                    paystackTransactionId: {
                       integerValue:
                         String(transaction.id),
                     },
+
                     amount: {
                       integerValue:
                         String(transaction.amount),
                     },
+
                     currency: {
                       stringValue:
                         transaction.currency,
                     },
+
                     status: {
                       stringValue:
                         transaction.status,
                     },
+
                     product: {
                       stringValue:
-                        transaction.metadata.product,
+                        transaction.metadata
+                          .product,
                     },
+
                     createdAt: {
                       timestampValue:
                         transactionTimestamp,
@@ -545,16 +632,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
       /*
        * Firestore can abort a transaction because another
-       * transaction modified one of the documents 
-       * Retry the transaction in that case.
-       * The code below allows the loop to run again IF the transaction wasn't aborted. 
+       * transaction modified one of the documents.
        */
       const commitResult =
         await commitResponse.json();
 
       if (
         commitResponse.status !== 409 &&
-        commitResult.error?.status !== "ABORTED"
+        commitResult.error?.status !==
+          "ABORTED"
       ) {
         throw new Error(
           "Could not commit Firestore transaction."
@@ -579,18 +665,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
         headers: {
           "Content-Type":
             "application/json",
-            ...corsHeaders
+          ...corsHeaders,
         },
       }
     );
   } catch (error: unknown) {
     console.error(error);
 
-    return new Response(JSON.stringify({
-      error: "Internal server error.",
-    }), {
-      status: 500,
-      headers: corsHeaders
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error.",
+      }),
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
+    );
   }
 });

@@ -7,7 +7,6 @@ const key = Deno.env.get("SERVICE_ACCOUNT_PRIVATE_KEY");
 const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID");
 const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://qblclassroom.com",
   "Access-Control-Allow-Headers":
@@ -19,17 +18,22 @@ if (!key) {
   throw new Error("SERVICE_ACCOUNT_PRIVATE_KEY is not set.");
 }
 
+if (!PAYSTACK_SECRET_KEY) {
+  throw new Error("PAYSTACK_SECRET_KEY is not set.");
+}
+
 const privateKey = await importPKCS8(key, "RS256");
 
 const FIRESTORE_BASE =
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-const FIRESTORE_DOC_BASE =`projects/${PROJECT_ID}/databases/(default)/documents`;   
+const FIRESTORE_DOC_BASE =
+  `projects/${PROJECT_ID}/databases/(default)/documents`;
 
 
 async function getFirestoreAccessToken() {
   const signedJWT = await new SignJWT({
-    scope: "https://www.googleapis.com/auth/datastore", 
+    scope: "https://www.googleapis.com/auth/datastore",
   })
     .setProtectedHeader({
       alg: "RS256",
@@ -130,12 +134,14 @@ Deno.serve(async (req) => {
     if (!signature) {
       return new Response(
         "Missing Paystack signature.",
-        { status: 400, headers: corsHeaders }
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
       );
     }
 
     /*
-     * IMPORTANT:
      * Read the raw request body.
      * Do not JSON.stringify() the parsed object.
      */
@@ -152,13 +158,17 @@ Deno.serve(async (req) => {
 
       return new Response(
         "Invalid webhook signature.",
-        { status: 400, headers: corsHeaders }
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
       );
     }
 
     const event = JSON.parse(rawBody);
 
     switch (event.event) {
+
       case "charge.success": {
         const transaction = event.data;
 
@@ -224,6 +234,9 @@ Deno.serve(async (req) => {
           await beginResponse.json();
 
 
+        /*
+         * Verify that the tutor exists.
+         */
         const userResponse = await fetch(
           `${FIRESTORE_BASE}/admin/${uid}?transaction=${encodeURIComponent(
             transactionId
@@ -242,19 +255,45 @@ Deno.serve(async (req) => {
           );
         }
 
-        const user = await userResponse.json();
+        /*
+         * Retrieve the private payment document.
+         *
+         * New location:
+         * admin/{uid}/payment/private
+         */
+        const paymentResponse = await fetch(
+          `${FIRESTORE_BASE}/admin/${uid}/payment/private?transaction=${encodeURIComponent(
+            transactionId
+          )}`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        let paymentData = null;
+
+        if (paymentResponse.ok) {
+          paymentData = await paymentResponse.json();
+        } else if (paymentResponse.status !== 404) {
+          throw new Error(
+            `Could not retrieve payment document: ${
+              await paymentResponse.text()
+            }`
+          );
+        }
 
         /*
-         * Firestore REST represents fields using
-         * typed values.
+         * Check the existing entitlement.
          */
         const hasAdFree =
-          user.fields?.hasAdFree?.booleanValue === true;
+          paymentData?.fields?.hasAdFree?.booleanValue === true;
 
         if (hasAdFree) {
           /*
-           * The user already has AD_FREE.
-           * Nothing further needs to be written.
+           * The tutor already has AD_FREE.
            */
           break;
         }
@@ -262,11 +301,25 @@ Deno.serve(async (req) => {
         const reference =
           transaction.reference;
 
-        const tutorDocumentName =
-          `${FIRESTORE_DOC_BASE}/admin/${uid}`;
-
+        /*
+         * Private payment document.
+         *
+         * New location:
+         * admin/{uid}/payment/private
+         */
         const paymentDocumentName =
+          `${FIRESTORE_DOC_BASE}/admin/${uid}/payment/private`;
+
+        /*
+         * Individual Paystack transaction record.
+         *
+         * Kept separately from the private entitlement document.
+         */
+        const transactionDocumentName =
           `${FIRESTORE_DOC_BASE}/payments/${reference}`;
+
+        const now =
+          new Date().toISOString();
 
         /*
          * Commit both writes atomically.
@@ -285,28 +338,62 @@ Deno.serve(async (req) => {
               transaction: transactionId,
 
               writes: [
+
+                // ---------------------------------------------
+                // PAYMENT / ENTITLEMENT
+                // ---------------------------------------------
+
                 {
                   update: {
-                    name: tutorDocumentName,
+                    name: paymentDocumentName,
 
                     fields: {
-                      ...user.fields,
-
                       hasAdFree: {
                         booleanValue: true,
                       },
 
                       adFreePurchasedAt: {
-                        timestampValue:
-                          new Date().toISOString(),
+                        timestampValue: now,
+                      },
+
+                      lastPaystackReference: {
+                        stringValue: reference,
+                      },
+
+                      lastPaystackTransactionId: {
+                        integerValue:
+                          String(transaction.id),
+                      },
+
+                      lastAmount: {
+                        integerValue:
+                          String(transaction.amount),
+                      },
+
+                      lastCurrency: {
+                        stringValue:
+                          transaction.currency,
+                      },
+
+                      status: {
+                        stringValue: "paid",
+                      },
+
+                      product: {
+                        stringValue: product,
                       },
                     },
                   },
                 },
 
+
+                // ---------------------------------------------
+                // PAYMENT TRANSACTION RECORD
+                // ---------------------------------------------
+
                 {
                   update: {
-                    name: paymentDocumentName,
+                    name: transactionDocumentName,
 
                     fields: {
                       uid: {
@@ -315,7 +402,7 @@ Deno.serve(async (req) => {
 
                       paystackReference: {
                         stringValue:
-                          transaction.reference,
+                          reference,
                       },
 
                       paystackTransactionId: {
@@ -342,8 +429,7 @@ Deno.serve(async (req) => {
                       },
 
                       createdAt: {
-                        timestampValue:
-                          new Date().toISOString(),
+                        timestampValue: now,
                       },
                     },
                   },
@@ -364,6 +450,7 @@ Deno.serve(async (req) => {
         break;
       }
 
+
       default:
         console.log(
           `Unhandled Paystack event: ${event.event}`
@@ -378,10 +465,11 @@ Deno.serve(async (req) => {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders
+          ...corsHeaders,
         },
       }
     );
+
   } catch (error) {
     console.error(
       "Webhook processing failed:",
@@ -390,7 +478,10 @@ Deno.serve(async (req) => {
 
     return new Response(
       "Webhook processing failed.",
-      { status: 500, headers: corsHeaders }
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
     );
   }
 });

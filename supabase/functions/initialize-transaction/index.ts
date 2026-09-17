@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
     const { access_token } = await tokenResponse.json();
 
     const userResponse = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/admin/${uid}`,
+      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/admin/${uid}/payment/private`,
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
