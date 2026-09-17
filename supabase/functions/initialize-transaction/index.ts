@@ -147,22 +147,7 @@ Deno.serve(async (req) => {
 
     const tutor = await userResponse.json();
 
-    if (!userResponse.ok) {
-      console.error("Firestore tutor lookup failed:", tutor);
 
-      return new Response(
-        JSON.stringify({
-          error: "Tutor account was not found.",
-        }),
-        {
-          status: 404,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders,
-          },
-        }
-      );
-    }
 
     if (tutor.fields?.hasAdFree?.booleanValue === true) {
   return new Response(
