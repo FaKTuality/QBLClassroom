@@ -469,12 +469,7 @@ const fisherYates = (array) => {
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="close-modal"
-              onClick={closeModal}
-            >
-              &times;
-            </button>
+
 
             {responseInfo.responseType === "text" && (
               <div><h4 className="header-centered">Read this</h4><div>{responseInfo.responsePayload}</div></div>

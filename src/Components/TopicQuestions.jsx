@@ -344,12 +344,6 @@ export const TopicQuestions = ( )=> {
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="close-modal"
-              onClick={() => setShowMedia(false)}
-            >
-              &times;
-            </button>
 
             {responseInfo.responseType === "text" && (
               <p>{responseInfo.responsePayload}</p>
