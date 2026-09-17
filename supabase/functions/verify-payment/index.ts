@@ -9,7 +9,7 @@ import {
 
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://qbl-classroom.vercel.app",
+  "Access-Control-Allow-Origin": "https://qblclassroom.com",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",

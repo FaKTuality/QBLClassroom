@@ -1,6 +1,6 @@
 const PrivacyPolicy = () => {
 return (
-<div className="privpol centered" style={{width: "75%"}}>
+<div className="privpol centered dark-support" style={{width: "75%"}}>
 <p className="dark-support"> <strong>Last Updated: 16th September 2026</strong> </p>
   <h1>1. Information We Collect</h1>
   <hr />
@@ -115,7 +115,7 @@ return (
   <p>QBL Classroom may be used in educational settings involving students who are minors.</p>
   <p>We recognize that children's personal information may receive additional legal protections depending on the applicable jurisdiction.</p>
   <p>Where required by applicable law, the appropriate parent, guardian, school, tutor, or other authorized adult should provide or obtain the necessary consent before a minor's personal information is submitted to QBL Classroom.</p>
-  <p>If you believe that a child has provided personal information to QBL Classroom without the required authorization, please contact us at [insert privacy email].</p>
+  <p>If you believe that a child has provided personal information to QBL Classroom without the required authorization, please contact us at <email>deePrySys@gmail.com</email>.</p>
   <p>If we determine that we have collected information that we are legally required to delete, we will take appropriate steps to address it.</p>
 
   <h1>6. Cookies and Similar Technologies</h1>
@@ -178,7 +178,7 @@ return (
   </ul>
   <p>These rights are subject to applicable legal limitations.</p>
   <p>To exercise an applicable privacy right, contact us at:</p>
-  <p>[insert privacy email]</p>
+  <p><email>deePrySys@gmail.com</email></p>
   <p>We may need to verify your identity before fulfilling certain requests.</p>
 
   <h1>12. International Data Transfers</h1>

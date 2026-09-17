@@ -340,7 +340,7 @@ useEffect(()=> {
 
 
   return (
-    <div className="flex-hori">
+    <div className="flex-hori dark-support">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}

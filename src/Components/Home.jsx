@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const Home = () => {
   const location = useLocation();
@@ -298,6 +299,27 @@ export const Home = () => {
           Get Started
         </a>
       </section>
+
+
+<footer className="home-footer">
+  <div className="home-footer-links">
+    <Link to="/navauth/privacypolicy" className="consent-link">
+      Privacy Policy
+    </Link>
+
+    <span>·</span>
+
+    <Link to="/navauth/tos" className="consent-link">
+      Terms of Service
+    </Link>
+  </div>
+
+  <p className="home-footer-copyright">
+    © 2026 QBL Classroom. All rights reserved.
+  </p>
+</footer>
+
+
 
     </main>
   );

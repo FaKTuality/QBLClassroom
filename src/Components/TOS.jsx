@@ -2,7 +2,7 @@ import React from "react";
 
 const TOS = () => {
 return (
-<div className="tos centered" style={{width: "75%"}}>
+<div className="tos centered dark-support" style={{width: "75%"}}>
 
 <p className="dark-support"> <strong>Last Updated: 16th September 2026</strong>  </p>
   <h1>1. About QBL Classroom</h1>
@@ -148,9 +148,16 @@ return (
   <p>If you do not agree with the updated Terms, you should stop using QBL Classroom.</p>
 
   <h1>19. Governing Law and Disputes</h1><hr />
-  <p>These Terms are governed by the laws of [insert jurisdiction], without regard to conflict-of-law principles.</p>
-  <p>Any dispute arising from or relating to these Terms or QBL Classroom will be handled through [insert courts/arbitration/other dispute-resolution process and jurisdiction], subject to any rights that cannot legally be waived.</p>
+ <p>
+  These Terms are governed by the laws of the Federal Republic of Nigeria,
+  without regard to conflict-of-law principles.
+</p>
 
+<p>
+  Any dispute arising from or relating to these Terms or QBL Classroom will
+  be subject to the jurisdiction of the courts of the Federal Republic of
+  Nigeria, subject to any rights that cannot legally be waived.
+</p>
   <h1>20. Severability</h1><hr />
   <p>If any provision of these Terms is determined to be invalid or unenforceable, that provision will be interpreted or modified to the minimum extent necessary to make it enforceable where legally permitted.</p>
   <p>The remaining provisions will continue in effect.</p>

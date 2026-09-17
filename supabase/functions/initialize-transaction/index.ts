@@ -7,7 +7,7 @@ import {
 } from "jose";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://qbl-classroom.vercel.app",
+  "Access-Control-Allow-Origin": "https://qblclassroom.com",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           email,
-          amount: 5000 * 100,
+          amount: 50 * 100,
           currency: "NGN",
           channels: ["card", "bank", "bank_transfer", "ussd"],
           metadata: {
