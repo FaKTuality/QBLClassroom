@@ -249,7 +249,10 @@ export const ViewTopics = () => {
       
       : allTopics.map((topic)=>
       <div key={topic.id} className="listItem relative">
-        <div>{parseCode(parseTopic(topic.data().topicName, changedTopics))}</div>
+        <div onClick={(e) => {
+            e.stopPropagation(); 
+            handleShowOptions(topic.id)
+          }}>{parseCode(parseTopic(topic.data().topicName, changedTopics))}</div>
         <div className="three-dots for-mobile"
           onClick={(e) => {
             e.stopPropagation(); 
