@@ -7,6 +7,8 @@ import { useThreeDots } from "../Hooks";
 import { useTopicChange, parseTopic } from "../Hooks";
 import { useDispatch } from "react-redux";
 import { changeTopic } from "../store/topicConfigSlice";
+import GoogleAds from "./GoogleAds";
+import { useSelector } from "react-redux";
 
 const errorMessages = {
   "auth/user-not-found":
@@ -55,7 +57,7 @@ export const ViewTopicsStudent = () => {
   const [ subSnaps, setSubSnaps ] = useState(null); 
   const [ tutorId, setTutorId ] = useState(null); 
   const dispatch = useDispatch(); 
-  
+  const hasAdFree = useSelector((state) => state.auth.hasAdFree);
 
 useEffect(() => {
     if (!studentId) {
@@ -169,7 +171,7 @@ useEffect(() => {
   return (
     <div className="center_piece">
       <h2 className="centered">Topics</h2>
-
+    {!hasAdFree && <GoogleAds />}
       {topics.length === 0 ? 
         <p className="centered">No topics yet.</p>
       

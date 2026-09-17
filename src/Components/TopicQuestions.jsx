@@ -7,6 +7,8 @@ import { db } from "../../Firebase/index.js";
 import { RevolvingDot } from "react-loader-spinner";
 import { useNameChange, parseName } from "../Hooks";
 import { useTopicChange, parseTopic, parseCode } from "../Hooks";
+import GoogleAds from "./GoogleAds";
+import { useSelector } from "react-redux";
 
 
 const getWikimediaCommonsFileUrl = (trimmedUrl) => {
@@ -178,6 +180,7 @@ export const TopicQuestions = ( )=> {
   const [ showMedia, setShowMedia ] = useState(false); 
   const changedNames = useNameChange(); 
   const changedTopics = useTopicChange(); 
+  const hasAdFree = useSelector((state) => state.auth.hasAdFree);
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -280,6 +283,7 @@ export const TopicQuestions = ( )=> {
     <>
       <div className="center_piece">
         {<h2 className="centered">Questions under {parseCode(parseTopic(topicInfo.topicName, changedTopics))} for {parseName(topicInfo.name, topicInfo.studentId , changedNames)}</h2>}
+        {!hasAdFree && <GoogleAds />}
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}
         {querySnap.docs.length === 0 ? 
         <p className="centered">No questions have been added to this topic</p>

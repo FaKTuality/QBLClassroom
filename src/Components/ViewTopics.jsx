@@ -9,8 +9,8 @@ import { RevolvingDot } from "react-loader-spinner";
 import { useTopicChange, parseTopic } from "../Hooks";
 import { useDispatch } from "react-redux";
 import { changeTopic } from "../store/topicConfigSlice";
-
-
+import GoogleAds from "./AdComponent.jsx";
+import { useSelector } from "react-redux";
 
 const errorMessages = {
   "auth/user-not-found":
@@ -54,7 +54,7 @@ const errorMessages = {
 
 
 export const ViewTopics = () => {
-
+  const hasAdFree = useSelector((state) => state.auth.hasAdFree);
   const navigate = useNavigate();
   const dispatch = useDispatch(); 
   const changedTopics = useTopicChange(); 
@@ -238,6 +238,7 @@ export const ViewTopics = () => {
   return(
     <div className="center_piece" onClick={randomClick}>
       <h2 className="centered">Topics</h2>
+      {!hasAdFree && <GoogleAds />}
       {showNotif && <Notif operation='delete' setShowNotif={setShowNotif}/> }
       {showNotif2 && <Notif operation='no-students' setShowNotif={setShowNotif2}/> }
       {showNotif3 && <Notif operation='add-student' setShowNotif={setShowNotif3} />}
