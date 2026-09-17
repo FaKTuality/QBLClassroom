@@ -180,7 +180,7 @@ export const TopicQuestions = ( )=> {
   const [ showMedia, setShowMedia ] = useState(false); 
   const changedNames = useNameChange(); 
   const changedTopics = useTopicChange(); 
-  const hasAdFree = useSelector((state) => state.auth.hasAdFree);
+  
   useEffect(() => {
     const fetchQuestions = async () => {
       try {

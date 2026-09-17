@@ -54,7 +54,7 @@ const errorMessages = {
 
 
 export const ViewTopics = () => {
-  const hasAdFree = useSelector((state) => state.auth.hasAdFree);
+  
   const navigate = useNavigate();
   const dispatch = useDispatch(); 
   const changedTopics = useTopicChange(); 

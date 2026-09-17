@@ -57,7 +57,7 @@ export const ViewTopicsStudent = () => {
   const [ subSnaps, setSubSnaps ] = useState(null); 
   const [ tutorId, setTutorId ] = useState(null); 
   const dispatch = useDispatch(); 
-  const hasAdFree = useSelector((state) => state.auth.hasAdFree);
+  
 
 useEffect(() => {
     if (!studentId) {
