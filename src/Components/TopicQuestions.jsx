@@ -7,7 +7,7 @@ import { db } from "../../Firebase/index.js";
 import { RevolvingDot } from "react-loader-spinner";
 import { useNameChange, parseName } from "../Hooks";
 import { useTopicChange, parseTopic, parseCode } from "../Hooks";
-import GoogleAds from "./GoogleAds";
+import GoogleAds from "./AdComponent.jsx"; 
 import { useSelector } from "react-redux";
 
 

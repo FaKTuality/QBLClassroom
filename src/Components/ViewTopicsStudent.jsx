@@ -7,7 +7,7 @@ import { useThreeDots } from "../Hooks";
 import { useTopicChange, parseTopic } from "../Hooks";
 import { useDispatch } from "react-redux";
 import { changeTopic } from "../store/topicConfigSlice";
-import GoogleAds from "./GoogleAds";
+import GoogleAds from "./AdComponent.jsx"; 
 import { useSelector } from "react-redux";
 
 const errorMessages = {
