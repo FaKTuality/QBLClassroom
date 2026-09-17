@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           email,
-          amount: 50 * 100,
+          amount: 6639 * 100,
           currency: "NGN",
           channels: ["card", "bank", "bank_transfer", "ussd"],
           metadata: {

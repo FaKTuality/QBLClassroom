@@ -151,6 +151,8 @@ useEffect(() => {
     return <p className="center_piece">{error}</p>;
   }
 
+
+
   const handleClick = (topicName) => {
     navigate("/navstu/classroom", {
       state: { topicName, studentName },
@@ -173,7 +175,8 @@ useEffect(() => {
       <h2 className="centered">Topics</h2>
     
       {topics.length === 0 ? 
-        <p className="centered">No topics yet.</p>
+        <p className="centered">No topics yet.
+        </p>
       
       
       :topics.map((topic, index) => (

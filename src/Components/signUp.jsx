@@ -142,6 +142,7 @@ export const SignUp = () => {
       role: "tutor",
       createdAt: serverTimestamp(),
       displayName: name,
+      agreedToTerms: true, 
     };
 
     await Promise.all([
@@ -171,6 +172,7 @@ export const SignUp = () => {
       createdAt: serverTimestamp(),
       name,
       tutorId,
+      agreedToTerms: true, 
     };
 
     const studentObj = {
