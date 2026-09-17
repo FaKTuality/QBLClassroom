@@ -16,7 +16,8 @@ import { RevolvingDot } from "react-loader-spinner";
 import { reload } from "firebase/auth";
 import { FaGoogle, FaGithub, FaTwitter } from "react-icons/fa";
 import { sendEmailVerification } from "firebase/auth";
-
+import { Eye, EyeOff } from "lucide-react";
+import { usePasswordVisibility } from "../Hooks/index.jsx";
 
 const errorMessages = {
   "auth/user-not-found":
@@ -167,6 +168,11 @@ export const SignIn = () => {
 
   const [ verify, setVerify ] = useState(false);   
   const navigate = useNavigate();
+  const {
+    showPassword,
+    passwordType,
+    togglePasswordVisibility,
+  } = usePasswordVisibility();
   const [ error, setError ] = useState(null); 
   const [ verifying, setVerifying ] = useState(false); 
   const [ name, setName ] = useState(null); 
@@ -177,7 +183,7 @@ export const SignIn = () => {
   const [ count, setCount ] = useState(60); 
   const [ count2, setCount2 ] = useState(0); 
   const [ refresh, setRefresh ] = useState(verify && true)
-
+// 
 
 
 const createTutor = async (user, name) => {
@@ -369,6 +375,7 @@ const createTutor = async (user, name) => {
   const handleProviderSignIn = async (provider) => {
     try {
       const credential = await signInWithPopup(auth, provider);
+
       await routeUser(credential.user.uid);
     } catch (error) {
       alert(error.message);
@@ -543,24 +550,12 @@ if(reset) {
                   </div>
                 </button>
 
-                <button
-                  type="button"
-                  className="auth-button button-centered"
-                  onClick={() =>
-                    handleProviderSignIn(new TwitterAuthProvider())
-                  }
-                >
-                  <div className="flex-hori">
-                  <FaTwitter /> &nbsp;
-                  Continue with Twitter
-                  </div>
-                </button>
 
                   <div
                     className="or"
                   >
                     <div className="hr"><hr /></div>
-                    <span>or</span>
+                    <span className="dark-support">or</span>
                     <div className="hr"><hr /></div>
                   
                   </div>
@@ -585,15 +580,23 @@ if(reset) {
 
               <div className="label-input-pair-vertical">
                 <label htmlFor="password">Password</label>
-
+                  <div className="password-field">
                 <Field
                   id="password"
                   name="password"
-                  type="password"
+                  type={passwordType}
                   placeholder="Enter your password"
                   className="textInput"
-                />
-
+                />          
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                >
+                  
+                  {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+                </div>
                 <ErrorMessage
                   name="password"
                   component="div"

@@ -199,7 +199,7 @@ textarea, .textInput {
 
   .logo{
     width: 175px; 
-    height:61; 
+    height:61px; 
     margin-left: 30px; 
   }
 
@@ -455,7 +455,12 @@ textarea, .textInput {
   justify-content: space-between;
   align-items: center;  
   margin: 20px 0px; 
+  gap: 5px; 
 
+}
+
+.dark-support {
+  color: var(--text-color)
 }
 
 .flex-hori {
@@ -594,6 +599,10 @@ textarea, .textInput {
 
 ul {
   list-style-type: none;
+}
+
+.privpol li, .tos li {
+  list-style-type: disc;
 }
 
 .listItem {
@@ -768,7 +777,7 @@ ul {
 
 
 .close-modal {
-  position: fixed; 
+  position: absolute; 
   right: 10px; 
   top: -7.5px; 
   font-size: 35px;
@@ -776,6 +785,16 @@ ul {
   color: var(--text-color);
   margin-bottom: 5px; 
   
+}
+
+.close-modal-nav {
+  position: fixed; 
+  right: 10px; 
+  top: -7.5px; 
+  font-size: 35px;
+  cursor: pointer;
+  color: var(--text-color);
+  margin-bottom: 5px;   
 }
 
 
@@ -1527,4 +1546,58 @@ p {
   .home-final-cta {
     margin-bottom: 60px;
   }
+}
+
+.password-field {
+  position: relative;
+  color: var(--text-color)
+  
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 45px;
+  box-sizing: border-box;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  border: none;
+  background: none;
+  padding: 0;
+
+  cursor: pointer;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--shad) inset !important;
+  box-shadow: 0 0 0 1000px var(--qbg) inset !important;
+  -webkit-text-fill-color: var(--text-color) !important;
+  caret-color: var(--shad);
+  transition: background-color 5000s ease-in-out 0s; /* stops the color flashing back on interaction in some Chrome versions */
+}
+
+
+.consent-label {
+  display: block;
+  text-align: center;
+}
+
+.consent-link {
+  color: black;
+}
+
+.consent-link:hover {
+  color: bisque;
+}
+
+.consent-link:visited {
+  color: orange;
 }

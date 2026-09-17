@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useSelector } from "react-redux";
 
 
+
 export const useThreeDots = () => {
   const [ showOptions, setShowOptions ] = useState({
     id: null,
@@ -94,3 +95,35 @@ export const parseCode = (text) => {
     return part;
   });
 };
+
+
+
+
+export function usePasswordVisibility() {
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  return {
+    showPassword,
+    passwordType: showPassword ? "text" : "password",
+    togglePasswordVisibility,
+  };
+}
+
+export function usePasswordVisibility2() {
+  const [showPassword2, setShowPassword2] = useState(false);
+
+  const togglePasswordVisibility2 = () => {
+    setShowPassword2((prev) => !prev);
+  };
+
+  return {
+    showPassword2,
+    passwordType2: showPassword2 ? "text" : "password",
+    togglePasswordVisibility2,
+  };
+}
+

@@ -24,6 +24,8 @@ import {
 } from "firebase/firestore";
 import { RevolvingDot } from "react-loader-spinner";
 import { FaGithub, FaGoogle, FaTwitter } from "react-icons/fa";
+import { Eye, EyeOff } from "lucide-react";
+import { usePasswordVisibility, usePasswordVisibility2 } from "../Hooks/index.jsx";
 
 
 const errorMessages = {
@@ -68,6 +70,7 @@ const initialValues = {
   email: "",
   password: "",
   confirmPassword: "",
+  agreedToTerms: false,
 };
 
 const validationSchema = Yup.object({
@@ -96,12 +99,26 @@ const validationSchema = Yup.object({
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords do not match")
     .required("Please confirm your password"),
+
+  agreedToTerms: Yup.boolean()
+    .oneOf([true])
+    .required()
 });
 
 export const SignUp = () => {
   
   const [ verify, setVerify ] = useState(false); 
   const { inviteDoc } = useParams();
+  const {
+    showPassword,
+    passwordType,
+    togglePasswordVisibility,
+  } = usePasswordVisibility();  
+    const {
+    showPassword2,
+    passwordType2,
+    togglePasswordVisibility2,
+  } = usePasswordVisibility2();  
   const [ error, setError ] = useState(null); 
   const [ verifying, setVerifying ] = useState(false); 
   const [ name, setName ] = useState(null); 
@@ -360,25 +377,13 @@ useEffect(()=> {
               </div>
             </button>
 
-            <button
-              type="button"
-              className="auth-button button-centered"
-              onClick={() =>
-                handleProviderSignUp(new TwitterAuthProvider())
-              }
-            >
-            <div className="flex-hori"> 
-              <FaTwitter />&nbsp; 
-              Continue with Twitter
-            </div>
-            </button>
 
             <div className="or">
               <div className="hr">
                 <hr />
               </div>
 
-              <span>or</span>
+              <span className="dark-support">or</span>
 
               <div className="hr">
                 <hr />
@@ -422,15 +427,23 @@ useEffect(()=> {
 
             <div className="label-input-pair-vertical">
               <label htmlFor="password">Password</label>
-
+              <div className="password-field">
               <Field
                 id="password"
                 name="password"
-                type="password"
+                type={passwordType}
                 placeholder="Enter your password"
                 className="textInput"
               />
-
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                >
+                  
+                  {showPassword ? <EyeOff /> : <Eye />}
+              </button>              
+              </div>
               <ErrorMessage
                 name="password"
                 component="div"
@@ -442,15 +455,23 @@ useEffect(()=> {
               <label htmlFor="confirmPassword">
                 Confirm Password
               </label>
-
+              <div className="password-field">
               <Field
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                type={passwordType2}
                 placeholder="Confirm your password"
                 className="textInput"
               />
-
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility2}
+                >
+                  
+                  {showPassword2 ? <EyeOff /> : <Eye />}
+              </button>                 
+              </div>
               <ErrorMessage
                 name="confirmPassword"
                 component="div"
@@ -463,7 +484,12 @@ useEffect(()=> {
                 {status}
               </div>
             )}
-
+          <label className="consent-label">
+            <Field type="checkbox" name="agreedToTerms" required />
+            I consent to QBLClassroom {" "}
+            <Link to="/navauth/privacypolicy" className="consent-link">Privacy Policy</Link> and{" "}
+            <Link to="/navauth/tos" className="consent-link">Terms of Service</Link>.
+          </label>
             <button
               type="submit"
               className="auth-button button-centered"
@@ -474,10 +500,13 @@ useEffect(()=> {
                 : "Create Account"}
             </button>
 
-            <p>
+            <p className="centered">
               Already have an account?{" "}
-              <Link to="/navauth/signin">Sign In</Link>
+              <Link to="/navauth/signin" className="consent-link">Sign In</Link>
             </p>
+
+
+         
           </Form>
         )}
       </Formik>

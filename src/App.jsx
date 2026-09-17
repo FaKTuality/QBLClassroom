@@ -25,6 +25,8 @@ import { db } from "../Firebase/index.js";
 import RemoveAds from "./Components/AdsRemove.jsx";
 import { auth } from "../Firebase/index.js";
 import { useAuth } from "./store/authProvider";
+import  TOS  from "./Components/TOS.jsx";
+import PrivacyPolicy from "./Components/PrivacyPolicy.jsx";
 import './App.css'
 
 const errorMessages = {
@@ -121,7 +123,9 @@ const App = () => {
       <Route path="/navauth" element={<NavigationAuth />}>
         <Route path="signup/:inviteDoc" element={<SignUp />} />
         <Route path="signup" element={<SignUp />} />
-        <Route path="signin" element={<SignIn />} />   
+        <Route path="signin" element={<SignIn />} /> 
+        <Route path="tos" element={<TOS />} />
+        <Route path="privacypolicy" element={<PrivacyPolicy />} />
       </Route>
 
       <Route path="/" element={<NavigationAuth />} >

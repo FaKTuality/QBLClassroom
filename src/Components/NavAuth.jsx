@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
+
 export const NavigationAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,12 +17,10 @@ export const NavigationAuth = () => {
 
 const toggleNav = () => setOpenNav(prev => !prev);
 
-  const isHome = currRoute === "/#home";
-
+  const isHome = currRoute === ("/#home" || "/");
   const isFeatures = currRoute === "/#features"
   const isPricing = currRoute === "/#pricing"
   const isFaqs = currRoute === "/#faqs"
-
 
   return (
     <>
@@ -33,7 +32,7 @@ const toggleNav = () => setOpenNav(prev => !prev);
         ☰
       </div>
 
-      <div onClick={toggleNav} className={`for-mobile hamburger ${!openNav && "hidden"} close-modal`}>
+      <div onClick={toggleNav} className={`for-mobile hamburger ${!openNav && "hidden"} close-modal-nav`}>
         &times;
       </div>
 

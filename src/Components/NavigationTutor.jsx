@@ -111,7 +111,7 @@ const toggleNav = () => {
       </div>
       <div 
         onClick={toggleNav}
-        className={`for-mobile hamburger ${!openNav && 'hidden'} close-modal` }>&times;</div>
+        className={`for-mobile hamburger ${!openNav && 'hidden'} close-modal-nav` }>&times;</div>
       <div className="flex-hori-space-between">
         <img src="../logo.png" className="logo for-desktop"/>
         <ul className={openNav? 'navtut_ul_open': 'navtut_ul'}>

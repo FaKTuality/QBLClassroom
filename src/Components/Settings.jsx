@@ -25,6 +25,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { arrayRemove, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "../store/authProvider";
+import { Eye, EyeOff } from "lucide-react";
+import { usePasswordVisibility } from "../Hooks/index.jsx";
 
 // fix tutor deleting account before student preventing student from deleting account. 
 
@@ -154,7 +156,40 @@ export default function Settings() {
   const userEmail = user?.email || user?.providerData.find(p => p.email)?.email;
   const navigate = useNavigate(); 
   const { theme, setTheme } = useAuth(); 
+  const {
+    showPassword,
+    passwordType,
+    togglePasswordVisibility,
+  } = usePasswordVisibility();  
 
+  const {
+    showPassword: showPassword2,
+    passwordType: passwordType2,
+    togglePasswordVisibility: togglePasswordVisibility2,
+  } = usePasswordVisibility(); 
+
+  const {
+    showPassword: showPassword3,
+    passwordType: passwordType3,
+    togglePasswordVisibility: togglePasswordVisibility3,
+  } = usePasswordVisibility(); 
+
+  const {
+    showPassword: showPassword4,
+    passwordType: passwordType4,
+    togglePasswordVisibility: togglePasswordVisibility4,
+  } = usePasswordVisibility(); 
+    const {
+    showPassword: showPassword5,
+    passwordType: passwordType5,
+    togglePasswordVisibility: togglePasswordVisibility5,
+  } = usePasswordVisibility(); 
+
+      const {
+    showPassword: showPassword6,
+    passwordType: passwordType6,
+    togglePasswordVisibility: togglePasswordVisibility6,
+  } = usePasswordVisibility(); 
 
 const toggleTheme = () => {
   setTheme(theme === "light" ? "dark" : "light");
@@ -370,36 +405,65 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
                   }}
                   onSubmit={changePassword}
                 >{({ isSubmitting }) => (<Form className="flex-vert">
+                    <div className="password-field">                
                     <Field
                       name="currentPassword"
-                      type="password"
+                      type={passwordType}
                       placeholder="Current password"
                       className="textInput"
                     />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={togglePasswordVisibility}
+                    >
+                      
+                      {showPassword ? <EyeOff /> : <Eye />}
+                  </button>
+                    </div>                    
 
                     <ErrorMessage 
                       name="currentPassword"   
                       component="div"
                       className="error-message" />
-
+                  <div className="password-field">
                     <Field
                       name="newPassword"
-                      type="password"
+                      type={passwordType2}
                       placeholder="New password"
                       className="textInput"
                     />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={togglePasswordVisibility2}
+                    >
+                      
+                      {showPassword2 ? <EyeOff /> : <Eye />}
+                  </button>
+                    </div>                       
 
                   <ErrorMessage 
                     name="newPassword"   
                     component="div"
                     className="error-message" />
+                    <div className="password-field">
 
                     <Field
                       name="confirmNewPassword"
-                      type="password"
+                      type={passwordType3}
                       placeholder="Confirm new password"
                       className="textInput"
-                    />                    
+                    />    
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility3}
+                >
+                  
+                  {showPassword3 ? <EyeOff /> : <Eye />}
+              </button>
+                </div>                                    
 
                   <ErrorMessage 
                     name="confirmNewPassword"   
@@ -462,17 +526,6 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
         unlinking={unlinking}
       />
 
-      <Provider
-        name="Twitter"
-        providerId="twitter.com"
-        providerType={providerType}
-        linked={linkedProviders.includes("twitter.com")}
-        canUnlink={canUnlink}
-        linkAccount={linkAccount}
-        unlinkAccount={unlinkAccount}
-        linking={linking}
-        unlinking={unlinking}
-      />
       </div>
       
 
@@ -509,26 +562,44 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
                 name="email"  
                 component="div"
                 className="error-message" />
-
+                  <div className="password-field">
                 <Field
                   name="password"
-                  type="password"
+                  type={passwordType4}
                   placeholder="Password"
                   className="textInput"
                 />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility4}
+                >
+                  
+                  {showPassword4 ? <EyeOff /> : <Eye />}
+              </button>
+                </div>                
 
               <ErrorMessage 
                 name="password"  
                 className="error-message" 
                 component="div"
                 />
-
+                <div className="password-field">
                 <Field
                   name="confirmPassword"
-                  type="password"
+                  type={passwordType5}
                   placeholder="Confirm password"
                   className="textInput"
-                />                
+                />  
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility5}
+                >
+                  
+                  {showPassword5 ? <EyeOff /> : <Eye />}
+              </button>
+                </div>                              
 
                 <ErrorMessage 
                   name="confirmPassword" 
@@ -547,7 +618,7 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
       { deleteAccount && 
         <div className="modal">
           <div className="modal-content">
-            <h2>confirm deletion</h2>
+            <h2>Confirm deletion</h2>
             <button
               type="button"
               onClick={() => setDeleteAccount(false)}
@@ -575,13 +646,22 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
                 name="email"  
                 component="div"
                 className="error-message" />
-
+                <div className="password-field">
                 <Field
                   name="password"
-                  type="password"
+                  type={passwordType6}
                   placeholder="Password"
                   className="textInput"
                 />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility6}
+                >
+                  
+                  {showPassword6 ? <EyeOff /> : <Eye />}
+              </button>
+                </div>                
 
               <ErrorMessage 
                 name="password"  
