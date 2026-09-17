@@ -238,7 +238,7 @@ export const ViewTopics = () => {
   return(
     <div className="center_piece" onClick={randomClick}>
       <h2 className="centered">Topics</h2>
-      {!hasAdFree && <GoogleAds />}
+      
       {showNotif && <Notif operation='delete' setShowNotif={setShowNotif}/> }
       {showNotif2 && <Notif operation='no-students' setShowNotif={setShowNotif2}/> }
       {showNotif3 && <Notif operation='add-student' setShowNotif={setShowNotif3} />}

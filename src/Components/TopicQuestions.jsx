@@ -283,7 +283,7 @@ export const TopicQuestions = ( )=> {
     <>
       <div className="center_piece">
         {<h2 className="centered">Questions under {parseCode(parseTopic(topicInfo.topicName, changedTopics))} for {parseName(topicInfo.name, topicInfo.studentId , changedNames)}</h2>}
-        {!hasAdFree && <GoogleAds />}
+        
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}
         {querySnap.docs.length === 0 ? 
         <p className="centered">No questions have been added to this topic</p>

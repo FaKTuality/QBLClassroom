@@ -171,7 +171,7 @@ useEffect(() => {
   return (
     <div className="center_piece">
       <h2 className="centered">Topics</h2>
-    {!hasAdFree && <GoogleAds />}
+    
       {topics.length === 0 ? 
         <p className="centered">No topics yet.</p>
       
