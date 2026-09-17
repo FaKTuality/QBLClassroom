@@ -189,8 +189,8 @@ export const Students = () => {
 
 
         )}
-        {showNotif && <Notif operation="remove-student" setShowNotif={setShowNotif} studentName={student.studentName} />}
-        {showNotif2 && <Notif operation="change-name" setShowNotif={setShowNotif2} studentName={student.studentName} />}
+        {showNotif && <Notif operation="remove-student" setShowNotif={setShowNotif} studentName={studentObj.studentName} />}
+        {showNotif2 && <Notif operation="change-name" setShowNotif={setShowNotif2} studentName={studentObj.studentName} />}
         { showModal && 
         <div onClick={() => setShowModal(false)} className="modal">
           <div onClick={(e) => e.stopPropagation()} className="modal-content">
