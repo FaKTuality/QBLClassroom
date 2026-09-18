@@ -58,7 +58,7 @@ export const QuestionForm = () => {
   const [ showNotif2, setShowNotif2 ] = useState(false); 
   const [ loading, setLoading ] = useState(true); 
   const [ error, setError ] = useState(null); 
-  const questionInfo = JSON.parse(localStorage.getItem('questionInfo'));
+  const [questionInfo] = useState(JSON.parse(localStorage.getItem('questionInfo')));
   const { questionNumber, questionData } = questionInfo || {};   
   const [ topicConfig, setTopicConfig ] = useState(JSON.parse(localStorage.getItem('topicConfig') || "null") );
   const { studentId, name, students, topicName } = topicConfig || {};
@@ -166,19 +166,13 @@ export const QuestionForm = () => {
         }}) : resetForm();
         
       if(topicConfig?.isEditing) {
-        setTimeout(() => {
-          navigate('/navtut/topicquestions', 
-            { state: { studentId,
-                        topicName,
-                        students,
-                        name, } })     
-        }, 1000)
-        setTimeout(() => {
           localStorage.removeItem("topicConfig")
-          localStorage.removeItem("questionInfo")    
-        }, 4000)
-          
-        setShowNotif2(true);        
+          localStorage.removeItem("questionInfo")      
+          setShowNotif2(true);     
+          setTimeout(() => {
+            navigate('/navtut/topicquestions', { state: { studentId, topicName, students, name } })
+          }, 1000)  
+                
       } else {
         if(bookmark === 1){
           await setDoc(doc(db, "admin", tutorId, "LQN", topicName), { last: 2})
