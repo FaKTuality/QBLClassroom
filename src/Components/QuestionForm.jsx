@@ -176,7 +176,7 @@ export const QuestionForm = () => {
         setTimeout(() => {
           localStorage.removeItem("topicConfig")
           localStorage.removeItem("questionInfo")    
-        }, 2000)
+        }, 4000)
           
         setShowNotif2(true);        
       } else {

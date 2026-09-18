@@ -244,7 +244,8 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
       const querySnap = await getDocs(colRef); 
       const allProm = querySnap.docs.map((docSnap) => {
         const ref = doc(db, `users/${student.studentId}/topics/${values.topicName}/questions/${docSnap.id}`)
-        return deleteDoc(ref); 
+        const ref2 = doc(db, `users/${student.studentId}/topics/${values.topicName}/submissions/${docSnap.id}`)
+        return Promise.all([deleteDoc(ref), deleteDoc(ref2)]); 
       })
       await Promise.all(allProm);       
     }
