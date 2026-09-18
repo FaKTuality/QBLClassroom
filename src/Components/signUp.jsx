@@ -189,9 +189,22 @@ export const SignUp = () => {
     navigate("/navstu/studentdashboard");
   };
 
-  const timer = () => {
-    setCount((count) => count - 1)
-  }
+let intervalId;
+
+const startTimer = () => {
+  clearInterval(intervalId);
+
+  intervalId = setInterval(() => {
+    setCount((count) => {
+      if (count === 1) {
+        clearInterval(intervalId);
+        return 0;
+      }
+
+      return count - 1;
+    });
+  }, 1000);
+};
 
   const onSubmit = async (values, { setSubmitting, setStatus, resetForm}) => {
     setStatus(null); 
@@ -201,10 +214,7 @@ export const SignUp = () => {
         values.email,
         values.password);
         await sendEmailVerification(credential.user); 
-        const intervalId = setInterval(timer, 1000)
-        setTimeout(() => {
-          clearInterval(intervalId)
-      }, 60000)
+        startTimer()
         setFirst(true); 
         setName(values.name)
         await setDoc(doc(db, "persistentInfo", credential.user.uid), inviteDoc ? { name: values.name, inviteDoc, verify: true} : { name: values.name, verify: true})
@@ -257,10 +267,7 @@ export const SignUp = () => {
     
     try {
       await sendEmailVerification(auth.currentUser);
-      const intervalId = setInterval(timer, 1000)
-      setTimeout(() => {
-        clearInterval(intervalId)
-      }, 60000)
+      startTimer(); 
       setResent(true); 
     } catch(e) {
       setError(e.message); 
@@ -289,10 +296,7 @@ export const SignUp = () => {
 
 useEffect(()=> {
   if(refresh){
-    const intervalId = setInterval(timer, 1000)
-    setTimeout(() => {
-      clearInterval(intervalId)
-    }, 60000)
+    startTimer(); 
   }
 }, [])
 

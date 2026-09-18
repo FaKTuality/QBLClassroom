@@ -272,17 +272,14 @@ const createTutor = async (user, name) => {
       );
       
       if(credential.user.emailVerified) {
-        console.log('youre email verified, so proceed')
+        
         await routeUser(credential.user.uid);        
       } else {
-        console.log('you"re not email verified, so i send a verification email')
+        
         await sendEmailVerification(auth.currentUser);
         setVerify(true); 
         setFirst(true); 
-        const intervalId = setInterval(timer, 1000)
-        setTimeout(() => {
-          clearInterval(intervalId)
-          }, 60000)        
+        startTimer();       
         }
     } catch (e) {
       console.log(e)
@@ -294,13 +291,32 @@ const createTutor = async (user, name) => {
     }
   };
 
-  const timer = () => {
-    setCount((count) => count - 1)
-  }
-  const timer2 = () => {
-    setCount2((count) => count - 1)
-  }
 
+  const startTimer = () => {
+  const intervalId = setInterval(() => {
+    setCount((count) => {
+      if (count <= 1) {
+        clearInterval(intervalId);
+        return 0;
+      }
+
+      return count - 1;
+    });
+  }, 1000);
+};
+
+const startTimer2 = () => {
+  const intervalId = setInterval(() => {
+    setCount2((count) => {
+      if (count <= 1) {
+        clearInterval(intervalId);
+        return 0;
+      }
+
+      return count - 1;
+    });
+  }, 1000);
+};
   const handleVerif = async () => {
     setVerifying(true); 
     setError(null); 
@@ -337,10 +353,7 @@ const createTutor = async (user, name) => {
       await sendPasswordResetEmail(auth, values.email);
 
       setNotif("A password reset link has been sent to your email.");
-      const intervalId = setInterval(timer2, 1000)
-      setTimeout(() => {
-        clearInterval(intervalId)
-      }, 60000)      
+      startTimer2();    
     } catch (e) {
       setStatus(
         errorMessages[e.code] ?? "Something went wrong. Please try again."
@@ -360,10 +373,7 @@ const createTutor = async (user, name) => {
     
     try {
       await sendEmailVerification(auth.currentUser);
-      const intervalId = setInterval(timer, 1000)
-      setTimeout(() => {
-        clearInterval(intervalId)
-      }, 60000)
+      startTimer(); 
       setResent(true); 
     } catch(e) {
       setError(e.message); 
@@ -387,14 +397,9 @@ const createTutor = async (user, name) => {
 
   useEffect(()=> {
     if(refresh){
-      const intervalId = setInterval(timer, 1000)
-      setTimeout(() => {
-        clearInterval(intervalId)
-      }, 60000)
+      startTimer(); 
     }
-
-
-
+  
   }, [])
 
 
