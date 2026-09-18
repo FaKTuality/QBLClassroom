@@ -266,10 +266,11 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
       setDeleting(true); 
       const studentPromises = selectedStudents.map((student) => deleteTopic(student))
       await Promise.all(studentPromises)
-      localStorage.removeItem("topicConfig")
+      
       if(allStudents){
         await deleteTopicForTutor(); 
       }
+      localStorage.removeItem("topicConfig")
       setShowNotif(true); 
       setShowModal(false); 
     } catch(e) {
