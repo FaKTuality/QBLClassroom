@@ -117,10 +117,12 @@ export const QuestionForm = () => {
   }  
 
   if(error) {
-    <p>{!navigator.onLine
+    return(<p>{!navigator.onLine
         ? "You're currently offline. Please reconnect to the internet and try again."
         : errorMessages[error.code] ?? "Something went wrong. Please try again."}</p>
+    )
   }
+    
 
   
   const handleSubmit = async (values, { resetForm, setStatus, setSubmitting }) => {
@@ -148,7 +150,7 @@ export const QuestionForm = () => {
     }
    
     const studentPromises = students.map((student, index)=> saveQuestion(student,index, questionNumber))
-    console.log(studentPromises); 
+    
       await Promise.all(studentPromises)
       topicConfig?.isEditing ? resetForm({ values: {
           additionalMediaType: "",
@@ -188,7 +190,7 @@ export const QuestionForm = () => {
         setLoading(true); 
       }        
     } catch(e){
-      console.log("goes inside catch as well", e); 
+      
       setStatus(!navigator.onLine
       ? "You're currently offline. Please reconnect to the internet and try again."
       : errorMessages[e.code] ?? "Something went wrong. Please try again.")

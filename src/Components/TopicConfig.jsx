@@ -199,8 +199,8 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
           if(stud.studentId === student.studentId){
             student[`${values.topicName}${questionNumber}deleted`] = questionNumber
           } 
-          return student;
         }
+        return student;
       })
       await updateDoc(docRef2, { students: updatedStudents})
     };
@@ -351,7 +351,7 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
         {({ values }) => 
           <Form onClick={(e) => e.stopPropagation()} className="modal-content list relative">
             {!deleteTopic && !editing && !addQuestion && !deletingQuestion && !addStudent &&<h4 className="header-centered">Configure your action</h4>}
-            <div className="close-modal">×</div>
+            <div onClick={closeModal} className="close-modal">×</div>
             {!(addQuestion || editing || deleteTopic || addStudent || deletingQuestion) &&
             <div className="label-input-pair-vertical">
               <label htmlFor="topicName">Topic:</label>

@@ -350,7 +350,7 @@ export const TopicQuestions = ( )=> {
           >
 
             {responseInfo.responseType === "text" && (
-              <p>{responseInfo.responsePayload}</p>
+              <p className="centered">{responseInfo.responsePayload}</p>
             )}
 
             {responseInfo.responseType === "image" && (
@@ -363,8 +363,8 @@ export const TopicQuestions = ( )=> {
 
             {responseInfo.responseType === "video" && (
             <iframe
-              width="560"
-              height="315"
+              width="100%"
+              height="100%"
               src={getYouTubeEmbedUrl(responseInfo.responsePayload, { autoplay: true, controls: false})}
               title="YouTube video player"
               frameBorder="0"

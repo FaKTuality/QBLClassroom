@@ -485,8 +485,8 @@ const fisherYates = (array) => {
 
             {responseInfo.responseType === "video" && (
             <iframe
-              width="560"
-              height="315"
+              width="100%"
+              height="100%"
               src={getYouTubeEmbedUrl(responseInfo.responsePayload, { autoplay: true, controls: false})}
               title="YouTube video player"
               frameBorder="0"
