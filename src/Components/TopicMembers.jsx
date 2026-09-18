@@ -150,7 +150,7 @@ export const TopicMembers = () => {
   return(
     <div className="center_piece">
     <h3 className="centered">Students with access to {parseCode(parseTopic(topicName, changedTopics))}</h3>
-      
+      <h4 className="centered">flip the switch to shuffle questions</h4>
         {students?.map((student, studentIndex) => 
         <div key={student.studentId} className="listItem relative" onClick={randomClick}>
         <div className="three-dots for-mobile"
@@ -159,7 +159,7 @@ export const TopicMembers = () => {
             handleShowOptions(student.studentId)
           }}
         >⋮</div>          
-          <div 
+          <div onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
             className={`${submissions[studentIndex].docs.length === 0 ? 'red' : 'green'}`}
           >{parseName(student.studentName, student.studentId, changedNames)}</div>
           <div className="theme-slider centered">
@@ -167,7 +167,7 @@ export const TopicMembers = () => {
             <div className="theme-slider-track">
               <div className={`${shuffleInfo[studentIndex] ? 'turnedOn' : 'turnedOff'}`} onClick={() => handleShuffle(student.studentId, studentIndex)}></div>
             </div>
-            <span className="theme-slider-label">Shuffle on</span>
+            <span className="theme-slider-label">on</span>
         </div>
           <div 
             className={showOptions.id === student.studentId && showOptions.show ? 'action-group' : 'buttonPair'}>
