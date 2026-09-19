@@ -472,7 +472,7 @@ const fisherYates = (array) => {
 
 
             {responseInfo.responseType === "text" && (
-              <div><h4 className="header-centered">Read this</h4><div>{responseInfo.responsePayload}</div></div>
+              <div><div>{responseInfo.responsePayload}</div></div>
             )}
 
             {responseInfo.responseType === "image" && (

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useSelector } from "react-redux";
-
+import React from "react";
 
 
 export const useThreeDots = () => {
@@ -86,16 +86,20 @@ export const parseCode = (text) => {
 
     if (part.startsWith("`") && part.endsWith("`")) {
       const code = part.slice(1, -1);
-
+      
       return (
         <code key={index}>{code}</code>
       );
     }
 
-    return part;
+    return part.split("\n").map((line, lineIndex, arr) => (
+      <React.Fragment key={`${index}-${lineIndex}`}>
+        {line}
+        {lineIndex < arr.length - 1 && <br />}
+      </React.Fragment>
+    ));
   });
 };
-
 
 
 

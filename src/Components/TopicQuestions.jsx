@@ -282,7 +282,10 @@ export const TopicQuestions = ( )=> {
   return(
     <>
       <div className="center_piece">
-        {<h2 className="centered">Questions under {parseCode(parseTopic(topicInfo.topicName, changedTopics))} for {parseName(topicInfo.name, topicInfo.studentId , changedNames)}</h2>}
+      <div style={{display: "flex", flexDirection: 'column', gap: "0px"}}>
+        <h3 className="centered">Questions for <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h3> 
+        <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicInfo.topicName, changedTopics))}</h3>
+      </div>        
         
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}
         {querySnap.docs.length === 0 ? 

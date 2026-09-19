@@ -80,7 +80,13 @@ export const QuestionForm = () => {
   const changedNames = useNameChange(); 
   
 
-
+useEffect(() => {
+  return () => {
+    if (!questionData) {
+      localStorage.removeItem('questionDraft');
+    }
+  };
+}, []);
   
   useEffect(() => {
     const getTopicConfig = async () => {

@@ -6,7 +6,7 @@ export const NavigationAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [openNav, setOpenNav] = useState(false);
-  const [ currRoute, setRoute ] = useState(null); 
+  const [ currRoute, setRoute ] = useState(location.pathname); 
 
   const handleClick = (route) => {
     navigate(route);
@@ -17,7 +17,7 @@ export const NavigationAuth = () => {
 
 const toggleNav = () => setOpenNav(prev => !prev);
 
-  const isHome = currRoute === ("/#home" || "/");
+  const isHome = currRoute === "/#home" || currRoute === "/";
   const isFeatures = currRoute === "/#features"
   const isPricing = currRoute === "/#pricing"
   const isFaqs = currRoute === "/#faqs"

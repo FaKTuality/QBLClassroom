@@ -358,10 +358,11 @@ textarea, .textInput {
 
   .modal-content {
     background-color: var(--card-color);
-    padding: 5px;
+    padding: 20px;
     border-radius: 10px;
     max-height: 450px; 
     min-width: 300px;
+    max-width: 350px; 
     box-shadow: 0 10px 20px rgba(0,0,0,.2);
     position: relative; 
     color: var(--text-color)
@@ -644,6 +645,7 @@ ul {
   padding: 10px; 
   color: var(--text-color); 
   overflow: auto;
+  white-space: pre-wrap;
 }
 
 .option-text {

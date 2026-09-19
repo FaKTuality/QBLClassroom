@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 export const Home = () => {
   const location = useLocation();
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     if (!location.hash) return;
@@ -35,12 +36,13 @@ export const Home = () => {
             <a href="#features" className="button">
               Explore Features
             </a>
-
-            <a href="/navauth/signup" className="button">
-              Get Started
+            <a href="/classroom" className="button" >
+              Enter classroom
             </a>
           </div>
         </div>
+
+        <div></div>
 
         <div className="home-hero-card">
           <div className="home-hero-card-inner">

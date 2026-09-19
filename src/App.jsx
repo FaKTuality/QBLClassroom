@@ -30,6 +30,7 @@ import RemoveAds from "./Components/AdsRemove.jsx";
 import { useAuth } from "./store/authProvider";
 import TOS from "./Components/TOS.jsx";
 import PrivacyPolicy from "./Components/PrivacyPolicy.jsx";
+import { DemoClassRoom } from "./Components/HomeClassroom.jsx";
 import "./App.css";
 
 const errorMessages = {
@@ -112,7 +113,7 @@ const App = () => {
               "Could not retrieve payment status."
           );
         }
-
+        console.log('hasAdFree', paymentResult.hasAdFree)
         /*
          * Update the local Redux entitlement state.
          */
@@ -231,6 +232,7 @@ const App = () => {
           index
           element={<Home />}
         />
+        <Route path="classroom" element={<DemoClassRoom />}/>
       </Route>
 
       <Route

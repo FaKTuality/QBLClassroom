@@ -6,7 +6,7 @@ import { AuthContext, useAuth } from "../store/authProvider";
 import { TopicConfig } from "./TopicConfig";
 import { Notif } from "./Notif";
 import { RevolvingDot } from "react-loader-spinner";
-import { useTopicChange, parseTopic } from "../Hooks";
+import { useTopicChange, parseTopic, parseCode, parseName } from "../Hooks";
 import { useDispatch } from "react-redux";
 import { changeTopic } from "../store/topicConfigSlice";
 import GoogleAds from "./AdComponent.jsx";
@@ -311,30 +311,3 @@ export const ViewTopics = () => {
   )
 }
 
-const parseCode = (text) => {
-  if (!text) return text;
-
-  const parts = text.split(/(`{3}[\s\S]*?`{3}|`[^`]+`)/g);
-
-  return parts.map((part, index) => {
-    if (part.startsWith("```") && part.endsWith("```")) {
-      const code = part.slice(3, -3);
-
-      return (
-        <pre key={index}>
-          <code>{code}</code>
-        </pre>
-      );
-    }
-
-    if (part.startsWith("`") && part.endsWith("`")) {
-      const code = part.slice(1, -1);
-
-      return (
-        <code key={index}>{code}</code>
-      );
-    }
-
-    return part;
-  });
-};

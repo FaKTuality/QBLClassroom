@@ -7,12 +7,23 @@ import {
   type JWTPayload,
 } from "jose";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://qblclassroom.com",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGIN = "https://qblclassroom.com";
+const LOCALHOST_ORIGIN_PATTERN = /^http:\/\/localhost:\d+$/;
+
+function getCorsHeaders(origin: string | null) {
+  const allowOrigin =
+    origin === ALLOWED_ORIGIN || (origin && LOCALHOST_ORIGIN_PATTERN.test(origin))
+      ? origin
+      : ALLOWED_ORIGIN;
+
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
 
 const key = Deno.env.get("SERVICE_ACCOUNT_PRIVATE_KEY");
 const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID");
@@ -135,6 +146,8 @@ async function getFirestoreAccessToken(): Promise<string> {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req.headers.get("Origin"));
+
   if (req.method === "OPTIONS") {
     return new Response(
       JSON.stringify({
