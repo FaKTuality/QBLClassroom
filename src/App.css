@@ -618,6 +618,18 @@ ul {
   
 }
 
+.listItemTopicMembers {
+  display: flex; 
+  align-items: center;
+  gap: 20px; 
+  background-color: var(--card-color);
+  padding: 15px; 
+  max-width: 100%;
+  border-radius: 3px; 
+  color: var(--text-color)
+  
+}
+
 
 
 .question-details {
@@ -723,6 +735,7 @@ ul {
 
 .relative {
   position:relative; 
+
 }
 
 .action:hover {
@@ -956,6 +969,10 @@ h2, h3, h4, h5, h6 {
 
 p {
   color: var(--text-color)
+}
+
+.end {
+  margin-left: auto; 
 }
 
 

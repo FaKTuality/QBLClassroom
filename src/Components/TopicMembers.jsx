@@ -151,18 +151,18 @@ export const TopicMembers = () => {
     <div className="center_piece">
       <div style={{display: "flex", flexDirection: 'column', gap: "1px"}}>
         <h3 className="centered">Students with access to </h3>
-        <h3 className="centered">{parseCode(parseTopic(topicName, changedTopics))}</h3>
+        <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicName, changedTopics))}</h3>
         <small className="centered" style={{color: 'orange'}}>flip the switch to shuffle questions</small>
       </div>
         {students?.map((student, studentIndex) => 
-        <div key={student.studentId} className="listItem relative" onClick={randomClick}>
+        <div key={student.studentId} className="listItemTopicMembers relative" onClick={randomClick}>
         <div className="three-dots for-mobile"
           onClick={(e) => {
             e.stopPropagation(); 
             handleShowOptions(student.studentId)
           }}
         >⋮</div>  
-          <div className="theme-slider centered">
+          <div className="theme-slider">
             <span className="theme-slider-label">off</span>
             <div className="theme-slider-track">
               <div className={`${shuffleInfo[studentIndex] ? 'turnedOn' : 'turnedOff'}`} onClick={() => handleShuffle(student.studentId, studentIndex)}></div>
@@ -174,7 +174,7 @@ export const TopicMembers = () => {
           >{parseName(student.studentName, student.studentId, changedNames)}</div>
 
           <div 
-            className={showOptions.id === student.studentId && showOptions.show ? 'action-group' : 'buttonPair'}>
+            className={`${showOptions.id === student.studentId && showOptions.show ? 'action-group' : 'buttonPair'} end`}>
               <button onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
                   className={`${showOptions.id === student.studentId && showOptions.show ? 'action' : 'button'}`} 
                   >View questions</button>    
