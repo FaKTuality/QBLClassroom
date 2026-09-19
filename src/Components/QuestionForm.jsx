@@ -51,6 +51,17 @@ const errorMessages = {
 };
 
 
+const DraftAutosave = () => {
+  const { values } = useFormikContext();
+ 
+  useEffect(() => {
+    localStorage.setItem('questionDraft', JSON.stringify(values));
+  }, [values]);
+ 
+  return null;
+};
+
+
 
 export const QuestionForm = () => {
   const { currentUser: user, loading: authLoading} = useAuth()
@@ -211,11 +222,15 @@ export const QuestionForm = () => {
     }
   )
 
+const draftValues = !questionData
+  ? JSON.parse(localStorage.getItem('questionDraft') || 'null')
+  : null;
+ 
 let initialValues = questionData || {
-  additionalMediaType: "",
-  additionalMediaLink: "",
-  questionText: "",
-  options: [
+  additionalMediaType: draftValues?.additionalMediaType || "",
+  additionalMediaLink: draftValues?.additionalMediaLink || "",
+  questionText: draftValues?.questionText || "",
+  options: draftValues?.options || [
     {
       text: "",
       responseType: "",
@@ -264,6 +279,7 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
     onSubmit={handleSubmit}>
       {({ values, setFieldValue, isSubmitting, status, errors }) => 
         <Form className="q-form">
+          {!questionData && <DraftAutosave />}
           <div className="label-input-pair-vertical">
           <label htmlFor="additionalMediaType">additional question media</label>
           <Field 
