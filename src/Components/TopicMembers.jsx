@@ -161,17 +161,18 @@ export const TopicMembers = () => {
             e.stopPropagation(); 
             handleShowOptions(student.studentId)
           }}
-        >⋮</div>          
-          <div onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
-            className={`${submissions[studentIndex].docs.length === 0 ? 'red' : 'green'}`}
-          >{parseName(student.studentName, student.studentId, changedNames)}</div>
+        >⋮</div>  
           <div className="theme-slider centered">
             <span className="theme-slider-label">off</span>
             <div className="theme-slider-track">
               <div className={`${shuffleInfo[studentIndex] ? 'turnedOn' : 'turnedOff'}`} onClick={() => handleShuffle(student.studentId, studentIndex)}></div>
             </div>
             <span className="theme-slider-label">on</span>
-        </div>
+        </div>                
+          <div onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
+            className={`${submissions[studentIndex].docs.length === 0 ? 'red' : 'green'}`}
+          >{parseName(student.studentName, student.studentId, changedNames)}</div>
+
           <div 
             className={showOptions.id === student.studentId && showOptions.show ? 'action-group' : 'buttonPair'}>
               <button onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
