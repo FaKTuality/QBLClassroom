@@ -296,7 +296,7 @@ export const TopicQuestions = ( )=> {
 
           const additionalMediaLink = docSnap.data().additionalMediaLink
           const additionalMediaType = docSnap.data().additionalMediaType
-
+        
            
           return(
             <div key={docSnap.id}>
@@ -326,12 +326,12 @@ export const TopicQuestions = ( )=> {
                     controls/>}
                 <div className="q-text">{parseCode(docSnap.data().questionText)}</div>
                 <ul className="list">
-                  { docSnap.data().options.map((option) => 
-                    <li key={option.text} 
+                  { docSnap.data().options.map((option) => { 
+                    return (<li key={option.text} 
                       className={`option flex-hori-no-center`} style={{cursor: 'pointer'}} 
                       onClick={() => handleClick(option)}><span className="response-type">{option.responseType}</span>&nbsp;
-                    <span className={`option-text ${selected === option.text && 'selected-option'}`}>{parseCode(option.text)}</span></li>
-                  )}
+                    <span className={`option-text ${selected === option.text && 'selected-option'}`}>{parseCode(option.text)}</span></li>)
+                  })}
                 </ul>
                 <div className={` ${showOptions.id === docSnap.id && showOptions.show ? 'action-group' : 'hidden'}`}>
                   <div className="action" onClick={()=> {handleEdit({ questionData: docSnap.data(), questionNumber: docSnap.id})}}>Edit</div>
@@ -353,7 +353,7 @@ export const TopicQuestions = ( )=> {
           >
 
             {responseInfo.responseType === "text" && (
-              <p className="centered">{responseInfo.responsePayload}</p>
+              <p className="centered">{parseCode(responseInfo.responsePayload)}</p>
             )}
 
             {responseInfo.responseType === "image" && (

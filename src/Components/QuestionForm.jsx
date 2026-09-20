@@ -85,6 +85,8 @@ useEffect(() => {
     if (!questionData) {
       localStorage.removeItem('questionDraft');
     }
+    localStorage.removeItem('topicConfig'); 
+    localStorage.removeItem('questionInfo'); 
   };
 }, []);
   
@@ -134,7 +136,7 @@ useEffect(() => {
   }  
 
   if(error) {
-    return(<p>{!navigator.onLine
+    return(<p className="centered" style={{color: 'red'}}>{!navigator.onLine
         ? "You're currently offline. Please reconnect to the internet and try again."
         : errorMessages[error.code] ?? "Something went wrong. Please try again."}</p>
     )
@@ -157,11 +159,12 @@ useEffect(() => {
       if(questionNumber){
         docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/${questionNumber}`)
       } else {
+        console.log("THIS IS QUESTIONNuMbEr", questionNumber); 
         docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`)
       } 
       return Promise.all([
         setDoc(docRef, newValues), 
-        setDoc(doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`), newValues), 
+        !questionNumber ?? setDoc(doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`), newValues), 
         setDoc(doc(db, `users/${student.studentId}/topics/${topicName}`),{ createdAt: serverTimestamp()})
       ]) ; 
     }

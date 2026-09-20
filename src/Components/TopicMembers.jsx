@@ -169,7 +169,7 @@ export const TopicMembers = () => {
             </div>
             <span className="theme-slider-label">on</span>
         </div>                
-          <div onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
+          <div style={{cursor: "pointer"}} onClick={() => handleQuestions({ studentId: student.studentId, topicName, students, name: student.studentName })}
             className={`${submissions[studentIndex].docs.length === 0 ? 'red' : 'green'}`}
           >{parseName(student.studentName, student.studentId, changedNames)}</div>
 
