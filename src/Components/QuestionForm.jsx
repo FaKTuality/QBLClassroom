@@ -156,7 +156,7 @@ useEffect(() => {
 
     const saveQuestion = async (student, index, questionNumber) => { 
       let docRef; 
-      if(questionNumber){
+      if(topicConfig?.isEditing){
         docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/${questionNumber}`)
       } else {
         console.log("THIS IS QUESTIONNuMbEr", questionNumber); 
