@@ -147,7 +147,7 @@ export const TutorDashboard = () => {
 
 
   if(error) {
-    return <p>{error}</p>
+    return <p className="centered">{error}</p>
   }
 
   return (

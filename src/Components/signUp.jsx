@@ -209,10 +209,17 @@ const startTimer = () => {
   const onSubmit = async (values, { setSubmitting, setStatus, resetForm}) => {
     setStatus(null); 
     try {
-      const credential = await createUserWithEmailAndPassword(
+        const inviteRef = doc(db, `admin/${inviteDoc}`);
+        const inviteSnap = await getDoc(inviteRef);
+
+        if (!inviteSnap.exists()) {
+          throw new Error("Invalid invite link");
+        }        
+        const credential = await createUserWithEmailAndPassword(
         auth,
         values.email,
         values.password);
+      
         await sendEmailVerification(credential.user); 
         startTimer()
         setFirst(true); 
@@ -221,10 +228,14 @@ const startTimer = () => {
         setVerify(true); 
         resetForm(); 
     } catch(e) {
-      console.log(e); 
-      setStatus(  !navigator.onLine
-    ? "You're currently offline. Please reconnect to the internet and try again."
-    : errorMessages[e.code] ?? "Something went wrong. Please try again."); 
+      if(e.message === "Invalid invite link") {
+        setStatus("Invalid invite link.") 
+      } else {
+        setStatus(  !navigator.onLine
+      ? "You're currently offline. Please reconnect to the internet and try again."
+      : errorMessages[e.code] ?? "Something went wrong. Please try again.");         
+      }
+
     } finally {
       setSubmitting(false); 
     }
@@ -486,7 +497,7 @@ useEffect(()=> {
             </div>
 
             {status && (
-              <div className="error-message">
+              <div className="error-message centered">
                 {status}
               </div>
             )}
