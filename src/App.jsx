@@ -185,9 +185,9 @@ const App = () => {
 
   if (error) {
     return (
-      <p className="center_piece">
-        {error}
-      </p>
+      <div className="center_piece">
+       <p className="centered">{error}</p> 
+      </div>
     );
   }
 

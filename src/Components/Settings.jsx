@@ -332,9 +332,11 @@ const manageDelete = async () => {
           await updateDoc(doc(db, "admin", tutorId), { students: arrayRemove({ studentName: name, studentId: auth?.currentUser.uid })})
         }
         
-        await deleteDoc(doc(db, "users", auth?.currentUser?.uid))
+        await Promise.all([deleteDoc(doc(db, "users", auth?.currentUser?.uid)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid))]);
       } else {
-        await deleteDoc(doc(db, "admin", auth?.currentUser?.uid))  
+        const docSnap = await getDoc(doc(db, "admin", auth?.currentUser?.uid))
+        const { inviteDoc } = docSnap.data() || {}
+        await Promise.all([deleteDoc(doc(db, "admin", auth?.currentUser?.uid)), deleteDoc(doc(db, "admin", inviteDoc)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid)) ])
       }      
       await deleteUser(auth?.currentUser); 
       
@@ -364,9 +366,11 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
       if (docSnap2.exists()) {
         await updateDoc(doc(db, "admin", tutorId), { students: arrayRemove({ studentName: name, studentId: auth?.currentUser?.uid })})
       }
-      await deleteDoc(doc(db, "users", auth?.currentUser?.uid)) 
+      await Promise.all([deleteDoc(doc(db, "users", auth?.currentUser?.uid)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid))]);
      } else {
-      await deleteDoc(doc(db, "admin", auth?.currentUser?.uid))  
+        const docSnap = await getDoc(doc(db, "admin", auth?.currentUser?.uid))
+        const { inviteDoc } = docSnap.data() || {}
+        await Promise.all([deleteDoc(doc(db, "admin", auth?.currentUser?.uid)), deleteDoc(doc(db, "admin", inviteDoc)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid)) ]) 
      }
       await deleteUser(auth?.currentUser); 
               
