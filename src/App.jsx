@@ -31,6 +31,7 @@ import { useAuth } from "./store/authProvider";
 import TOS from "./Components/TOS.jsx";
 import PrivacyPolicy from "./Components/PrivacyPolicy.jsx";
 import { DemoClassRoom } from "./Components/HomeClassroom.jsx";
+import { QuestionFormTV } from "./Components/TutorViewQForm.jsx";
 import "./App.css";
 
 const errorMessages = {
@@ -192,114 +193,45 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      <Route
-        path="/accessrestricted"
-        element={<AccessRestricted />}
-      />
+  <Routes>
+    <Route path="/accessrestricted" element={<AccessRestricted />} />
 
-      <Route
-        path="/navauth"
-        element={<NavigationAuth />}
-      >
-        <Route
-          path="signup/:inviteDoc"
-          element={<SignUp />}
-        />
-        <Route
-          path="signup"
-          element={<SignUp />}
-        />
-        <Route
-          path="signin"
-          element={<SignIn />}
-        />
-        <Route
-          path="tos"
-          element={<TOS />}
-        />
-        <Route
-          path="privacypolicy"
-          element={<PrivacyPolicy />}
-        />
-      </Route>
+    <Route path="/navauth" element={<NavigationAuth />}>
+      <Route path="signup/:inviteDoc" element={<SignUp />} />
+      <Route path="signup" element={<SignUp />} />
+      <Route path="signin" element={<SignIn />} />
+      <Route path="tos" element={<TOS />} />
+      <Route path="privacypolicy" element={<PrivacyPolicy />} />
+    </Route>
 
-      <Route
-        path="/"
-        element={<NavigationAuth />}
-      >
-        <Route
-          index
-          element={<Home />}
-        />
-        <Route path="classroom" element={<DemoClassRoom />}/>
-      </Route>
+    <Route path="/" element={<NavigationAuth />}>
+      <Route index element={<Home />} />
+      <Route path="classroom" element={<DemoClassRoom />} />
+    </Route>
 
-      <Route
-        path="/navstu"
-        element={<NavigationStudent />}
-      >
-        <Route
-          path="settings"
-          element={<Settings />}
-        />
-        <Route
-          path="studentdashboard"
-          element={<StudentDashboard />}
-        />
-        <Route
-          path="viewtopicsstudent"
-          element={<ViewTopicsStudent />}
-        />
-        <Route
-          path="classroom"
-          element={<ClassRoom />}
-        />
-      </Route>
+    <Route path="/navstu" element={<NavigationStudent />}>
+      <Route path="settings" element={<Settings />} />
+      <Route path="studentdashboard" element={<StudentDashboard />} />
+      <Route path="viewtopicsstudent" element={<ViewTopicsStudent />} />
+      <Route path="classroom" element={<ClassRoom />} />
+    </Route>
 
-      <Route
-        path="/navtut"
-        element={<NavigationTutor />}
-      >
-        <Route
-          path="students"
-          element={<Students />}
-        />
-        <Route
-          path="settings"
-          element={<Settings />}
-        />
-        <Route
-          path="tutordashboard"
-          element={<TutorDashboard />}
-        />
-        <Route
-          path="questionForm"
-          element={<QuestionForm />}
-        />
-        <Route
-          path="submissions"
-          element={<Submissions />}
-        />
-        <Route
-          path="topicmembers"
-          element={<TopicMembers />}
-        />
-        <Route
-          path="topicquestions"
-          element={<TopicQuestions />}
-        />
-        <Route
-          path="viewtopics"
-          element={<ViewTopics />}
-        />
-        <Route
-          path="removeads"
-          element={<RemoveAds />}
-        />
-      </Route>
-    </Routes>
-  );
-};
+    <Route path="/class" element={<ClassRoom />} />
+
+    <Route path="/navtut" element={<NavigationTutor />}>
+      <Route path="students" element={<Students />} />
+      <Route path="settings" element={<Settings />} />
+      <Route path="tutordashboard" element={<TutorDashboard />} />
+      <Route path="questionForm" element={<QuestionForm />} />
+      <Route path="questionFormTV" element={<QuestionFormTV />} />
+      <Route path="submissions" element={<Submissions />} />
+      <Route path="topicmembers" element={<TopicMembers />} />
+      <Route path="topicquestions" element={<TopicQuestions />} />
+      <Route path="viewtopics" element={<ViewTopics />} />
+      <Route path="removeads" element={<RemoveAds />} />
+    </Route>
+  </Routes>
+);
+}
 
 export default App;

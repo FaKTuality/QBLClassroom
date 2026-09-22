@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { useState, useEffect, useContext } from "react";
 import { db } from "../../Firebase/index.js";
 import { useNavigate } from "react-router-dom";
@@ -61,6 +61,8 @@ export const ViewTopics = () => {
   const [ newName, setNewName ] = useState(''); 
   const [ topicName, setTopicName ] = useState(null);
   const [ changing, setChanging ] = useState(false); 
+  const [ deleting, setDeleting ] = useState(false); 
+  const [ deletingErr, setDeletingErr ] = useState(false); 
   const [ nameChangeErr, setNameChangeErr ] = useState(null);
   const [ loading, setLoading ] = useState(true); 
   const [ error, setError ] = useState(false); 
@@ -81,7 +83,8 @@ export const ViewTopics = () => {
   });  
   const { currentUser: user, loading: authLoading} = useAuth()
   const tutorId = user?.uid
- 
+ const [ tutorView, setView ] = useState(false); 
+ const [ showModal3, setShowModal3 ] = useState(false); 
 
   useEffect(() => {
     const fetchTopics = async () => {
@@ -114,7 +117,7 @@ export const ViewTopics = () => {
 
     fetchTopics(); 
         
-  }, [deleteTopic, addQuestion, addStudent])
+  }, [deleteTopic, addQuestion, addStudent, showModal3])
 
 
   if(authLoading) {
@@ -234,10 +237,92 @@ export const ViewTopics = () => {
   }
 
 
+  const handleTutorView = () => {
+    setView(!tutorView); 
+  }
+
+  const handleAddQuestionTV = (topicData) => {
+    const questionState = {
+      topicName: topicData.topicName, 
+      isEditing: false,
+    }
+    navigate('/navtut/questionformTV', { state: questionState})
+  }
+
+
+    const deleteAllQuestionsStudent = async(student) => {
+      const colRef = collection(db, `users/${student.studentId}/topics/${topicName}/questions`)
+      const querySnap = await getDocs(colRef); 
+      const allProm = querySnap.docs.map((docSnap) => {
+        const ref = doc(db, `users/${student.studentId}/topics/${topicName}/questions/${docSnap.id}`)
+        const ref2 = doc(db, `users/${student.studentId}/topics/${topicName}/submissions/${docSnap.id}`)
+        return Promise.all([deleteDoc(ref), deleteDoc(ref2)]); 
+      })
+      await Promise.all(allProm);       
+    }
+
+    const deleteTopicStudent = async (student) => {
+      const docRef = doc(db, `users/${student.studentId}/topics/${topicName}`);
+      return Promise.all([deleteDoc(docRef), deleteAllQuestionsStudent(student)])
+    }    
+
+
+  const handleDeleteTopicTV = async () => {
+    setDeletingErr(false); 
+    try {
+      setDeleting(true); 
+      const docRef = doc(db, "admin", tutorId, "topics", topicName); 
+      const colRef = collection(db, "admin", tutorId, "topics", topicName, "questions")
+      const querySnap = await getDocs(colRef); 
+      const allProm = querySnap.docs.map((docSnap) => {
+        const docRef1 = doc(colRef, docSnap.id);
+        return deleteDoc(docRef1); 
+      })
+      await Promise.all(allProm)
+      const docRef2 = doc(db, 'admin', tutorId); 
+      const docSnap = await getDoc(docRef2); 
+      const { students } = docSnap.data(); 
+      const studentPromises = students.map((student) => deleteTopicStudent(student))
+      await Promise.all(studentPromises)
+      await deleteDoc(docRef); 
+      setShowModal3(false);
+      setShowNotif(true); 
+    } catch(e) {
+      console.error(e); 
+      setDeletingErr(
+        !navigator.onLine
+        ? "You're currently offline. Please reconnect to the internet and try again."
+        : errorMessages[e.code] ?? "Something went wrong. Please try again."        
+      )
+    } finally {
+      setDeleting(false); 
+    }
+  }
+
+  const confirmDelete = (topicData) => {
+    setTopicName(topicData.topicName); 
+    setShowModal3(true); 
+  }
+
+  const handleViewQuestions = (topicData) => {
+    const newState = {
+      ...topicData, 
+      tutorView, 
+    }
+    navigate('/navtut/topicquestions', { state: newState })
+  }
+
 
   return(
     <div className="center_piece" onClick={randomClick}>
       <h2 className="centered">Topics</h2>
+          <div className="theme-slider centered">
+            <span className="theme-slider-label">Student View</span>
+            <div className="theme-slider-track">
+              <div className={`${tutorView ? 'turnedOn' : 'turnedOff'}`} onClick={handleTutorView}></div>
+            </div>
+            <span className="theme-slider-label">Tutor View</span>
+        </div>       
       
       {showNotif && <Notif operation='delete' setShowNotif={setShowNotif}/> }
       {showNotif2 && <Notif operation='no-students' setShowNotif={setShowNotif2}/> }
@@ -249,7 +334,8 @@ export const ViewTopics = () => {
       
       : allTopics.map((topic)=>
       <div key={topic.id} className="listItem relative">
-        <div style={{cursor: "pointer"}} onClick={() => handleViewStudents(topic.data())}>{parseCode(parseTopic(topic.data().topicName, changedTopics))}</div>
+        <div style={{cursor: "pointer"}} onClick={tutorView ? () => handleViewQuestions(topic.data())
+           : () => handleViewStudents(topic.data())}>{parseCode(parseTopic(topic.data().topicName, changedTopics))}</div>
         <div className="three-dots for-mobile"
           onClick={(e) => {
             e.stopPropagation(); 
@@ -258,21 +344,28 @@ export const ViewTopics = () => {
         >⋮</div>
         <div className={showOptions.id === topic.id && showOptions.show ? 'action-group' : 'buttonPair'}>
 
-          <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} onClick={() => handleViewStudents(topic.data())}>students</div>
+          {!tutorView && <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} onClick={() => handleViewStudents(topic.data())}>students</div>}
           
           <div 
             className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
-            onClick={() => handleAddQuestion(topic.data())}>
+            onClick={tutorView ? () => handleAddQuestionTV(topic.data()) : () => handleAddQuestion(topic.data())}>
               + question
             </div>
-            <div 
+           {tutorView && <div 
               className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
               onClick={() => handleAddStudent(topic.data())}>
                 + student
-            </div>
-          <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
-          onClick={() => handleShowModal2(topic.id)}>Rename</div>            
-            <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} style={{color: 'red'}} onClick={() => handleDeleteTopic(topic.data()) }>delete</div>
+            </div>}
+
+           {tutorView && <div 
+              className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
+              onClick={() => handleViewQuestions(topic.data())}>
+                View Questions 
+            </div>}            
+          {tutorView && <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
+          onClick={() => handleShowModal2(topic.id)}>Rename</div>}            
+            <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} style={{color: 'red'}} 
+            onClick={tutorView ? () => confirmDelete(topic.data()) : () => handleDeleteTopic(topic.data()) }>delete</div>
         </div>
       </div> 
       )}
@@ -306,6 +399,24 @@ export const ViewTopics = () => {
             </div>
         </div>
       </div>}      
+
+
+
+
+      { showModal3 && 
+      <div className="modal">
+        <div className="modal-content">
+          <div onClick={() => setShowModal3(false)} className="close-modal">&times;</div>
+          <h4 className="header-centered">Confirm Delete</h4>
+          <p>Are you sure you want to delete this topic?</p>
+          <button 
+            disabled={deleting}
+            onClick={handleDeleteTopicTV} className="button centered">{deleting ? 'deleting...' : 'Confirm'}</button>
+            {deletingErr && <p className="error-message centered">{deletingErr}</p>}
+            
+        </div>
+      </div>}      
+
     </div>
 
   )

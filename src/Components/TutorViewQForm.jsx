@@ -12,7 +12,7 @@ import { flushSync } from "react-dom";
 import { useAuth } from "../store/authProvider";
 import { RevolvingDot } from "react-loader-spinner";
 import { Notif } from "./Notif";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTopicChange, useNameChange, parseTopic, parseCode, parseName } from "../Hooks";
 import { useFormikContext } from "formik";
 const errorMessages = {
@@ -63,22 +63,21 @@ const DraftAutosave = () => {
 
 
 
-export const QuestionForm = () => {
+export const QuestionFormTV = () => {
   const { currentUser: user, loading: authLoading} = useAuth()
+  const location = useLocation();
+  const [ questionState ] = useState(location.state); 
+  const { topicName, questionData, questionNumber, isEditing } = questionState; 
   const [ showNotif, setShowNotif ] = useState(false); 
   const [ showNotif2, setShowNotif2 ] = useState(false); 
   const [ loading, setLoading ] = useState(true); 
   const [ error, setError ] = useState(null); 
-  const [questionInfo] = useState(JSON.parse(localStorage.getItem('questionInfo')));
-  const { questionNumber, questionData } = questionInfo || {};   
-  const [ topicConfig, setTopicConfig ] = useState(JSON.parse(localStorage.getItem('topicConfig') || "null") );
-  const { studentId, name, students, topicName } = topicConfig || {};
   const [ bookmark, setBookmark ] = useState(null)
-  const [ navBack ] = useState(JSON.parse(localStorage.getItem('navBack') || "null") )
   const tutorId = user?.uid
   const navigate = useNavigate(); 
   const changedTopics = useTopicChange(); 
   const changedNames = useNameChange(); 
+
   
 
 useEffect(() => {
@@ -92,33 +91,25 @@ useEffect(() => {
 }, []);
   
   useEffect(() => {
-    const getTopicConfig = async () => {
-      const colRef = collection(db, `admin/${tutorId}/topics`)
-      const q = query(colRef, orderBy('createdAt', 'asc'))
-      let result = topicConfig; 
-      
+    const getLQN = async () => {
       try {
-        if(!result){
-          const topics = await getDocs(q)  
-          result = topics.docs[topics.docs.length - 1]?.data(); 
-          setTopicConfig(result);
-          
-        } 
-        const docSnap = await getDoc(doc(db, "admin", tutorId, "LQN", result.topicName))
+        const docSnap = await getDoc(doc(db, "admin", tutorId, "LQN", topicName))
         docSnap.exists() ? setBookmark(docSnap.data().last) : setBookmark(1);  
         setLoading(false);
-        console.log('breakage3')
       } catch(e) {
+        console.error(e)
         setError(!navigator.onLine
         ? "You're currently offline. Please reconnect to the internet and try again."
         : errorMessages[e.code] ?? "Something went wrong. Please try again.")
+      } finally {
+        setLoading(false);
       }
     }
 
-    if(topicConfig?.isEditing) {
+    if(isEditing) {
       setLoading(false)
     } else {
-      getTopicConfig(); 
+      getLQN(); 
     }    
   }, [showNotif])
 
@@ -155,25 +146,18 @@ useEffect(() => {
     try{    
     const newValues = !values.additionalMediaType && values.additionalMediaLink ? {...values, additionalMediaLink: ''}: values;
 
-    const saveQuestion = async (student, index, questionNumber) => { 
+    const saveQuestion = async (questionNumber) => { 
       let docRef; 
-      if(topicConfig?.isEditing){
-        docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/${questionNumber}`)
+      if(isEditing){
+        docRef = doc(db, `admin/${tutorId}/topics/${topicName}/questions/${questionNumber}`)
       } else {
-        console.log("THIS IS QUESTIONNuMbEr", questionNumber); 
-        docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`)
+        docRef = doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`)
       } 
-      return Promise.all([
-        setDoc(docRef, newValues), 
-        !questionNumber ?? setDoc(doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`), newValues), 
-        setDoc(doc(db, `users/${student.studentId}/topics/${topicName}`),{ createdAt: serverTimestamp()})
-      ]) ; 
+      return setDoc(docRef, newValues)
     }
-   
-    const studentPromises = students.map((student, index)=> saveQuestion(student,index, questionNumber))
     
-      await Promise.all(studentPromises)
-      topicConfig?.isEditing ? resetForm({ values: {
+      await saveQuestion(questionNumber)
+      isEditing ? resetForm({ values: {
           additionalMediaType: "",
           additionalMediaLink: "",
           questionText: "",
@@ -186,15 +170,11 @@ useEffect(() => {
           ]
         }}) : resetForm();
         
-      if(topicConfig?.isEditing) {
-          localStorage.removeItem("topicConfig")
-          localStorage.removeItem("questionInfo")  
-          localStorage.removeItem("navBack")    
+      if(isEditing) { 
           setShowNotif2(true);     
           setTimeout(() => {
-            navigate('/navtut/topicquestions', { state: { studentId, topicName, students: navBack, name } })
+            navigate('/navtut/topicquestions', { state: { topicName, tutorView: true } })
           }, 1000)  
-                
       } else {
         if(bookmark === 1){
           await setDoc(doc(db, "admin", tutorId, "LQN", topicName), { last: 2})
@@ -273,11 +253,8 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
       <div>
         <div className="q-number">{questionNumber ? `question ${parseInt(questionNumber?.slice(8), 10)}` : `question ${bookmark}`}</div>
         <h2 className="header-centered">{parseCode(parseTopic(topicName, changedTopics))}</h2>
-        {name && 
-        <h3 className="header-centered">
-          Editing for {parseName(name, studentId, changedNames)[0].toUpperCase() + parseName(name, studentId, changedNames).slice(1)}
-        
-        </h3>}
+        {isEditing && <h3 className="header-centered">
+          Editing Question Bank</h3>}
       </div>
       }
   

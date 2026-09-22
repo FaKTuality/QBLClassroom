@@ -180,6 +180,7 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
         })
 
         localStorage.setItem("topicConfig", topicConfigSerial);
+        localStorage.setItem('navBack', JSON.stringify(values.students))
     }
     
     navigate('/navtut/questionform')
@@ -266,10 +267,6 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
       setDeleting(true); 
       const studentPromises = selectedStudents.map((student) => deleteTopic(student))
       await Promise.all(studentPromises)
-      
-      if(allStudents){
-        await deleteTopicForTutor(); 
-      }
       localStorage.removeItem("topicConfig")
       setShowNotif(true); 
       setShowModal(false); 

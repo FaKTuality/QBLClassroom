@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../Firebase/index.js";
@@ -57,7 +57,10 @@ export const ViewTopicsStudent = () => {
   const [ subSnaps, setSubSnaps ] = useState(null); 
   const [ tutorId, setTutorId ] = useState(null); 
   const dispatch = useDispatch(); 
-  
+  const [ entryErr, setEntryErr ] = useState(false); 
+  const [ entering, setEntering ] = useState(false); 
+  const [ resuming, setResuming ] = useState(false); 
+  const [ tName, setTName ] = useState(null); 
 
 useEffect(() => {
     if (!studentId) {
@@ -153,25 +156,60 @@ useEffect(() => {
 
 
 
-  const handleClick = (topicName) => {
-    navigate("/navstu/classroom", {
-      state: { topicName, studentName },
-    });
-    localStorage.setItem(`LQN${topicName}`, 1)    
+  const handleClick = async (topicName) => { 
+    setEntryErr(null); 
+    try {
+      setTName(topicName)
+      setEntering(true); 
+      const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
+      await setDoc(docRef,{ inClass: true}, { merge: true });
+      navigate("/class", {
+        state: { topicName, studentName },
+      });
+      localStorage.setItem(`LQN${topicName}`, 1)        
+    } catch(e) {
+      setEntryErr(
+        !navigator.onLine
+            ? "You're currently offline. Please reconnect to the internet and try again."
+            : errorMessages[e.code] ?? "Something went wrong. Please try again."        
+      )
+    } finally {
+        setEntering(false);
+    }
+  
   };
 
-  const handleResume = (topicName) => {
-    const bookmark = localStorage.getItem(`LQN${topicName}`)
-    const LQN = bookmark ? JSON.parse(bookmark) : null
-    
-    navigate("/navstu/classroom", {
-      state: { topicName, LQN, studentName },
-    });
-  };    
+  const handleResume = async (topicName) => {
+    setEntryErr(null); 
+    try {
+      setTName(topicName)
+      setResuming(true); 
+      const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
+      await setDoc(docRef,{ inClass: true}, { merge: true });    
+      const bookmark = localStorage.getItem(`LQN${topicName}`)
+      const LQN = bookmark ? JSON.parse(bookmark) : null
+      
+      navigate("/class", {
+        state: { topicName, LQN, studentName },
+      });
+    } catch(e) {
+      setEntryErr(
+        !navigator.onLine
+            ? "You're currently offline. Please reconnect to the internet and try again."
+            : errorMessages[e.code] ?? "Something went wrong. Please try again."        
+      )
+    } finally {
+        setResuming(false);      
+    }  
+  }
+
   
 
   return (
+    <>
+    <p className="centered">{entryErr}</p>
     <div className="center_piece">
+      
       <h2 className="centered">Topics</h2>
     
       {topics.length === 0 ? 
@@ -205,7 +243,7 @@ useEffect(() => {
             }
           >
             <button
-              disabled={localStorage.getItem(`LQN${topic.id}`)}
+              disabled={localStorage.getItem(`LQN${topic.id}`) || (entering && tName === topic.id)}
               className={
                 showOptions.id === topic.id && showOptions.show
                   ? "action"
@@ -213,11 +251,11 @@ useEffect(() => {
               }
               onClick={() => handleClick(topic.id)}
             >
-              {!subSnaps?.[index].empty ? "Redo" :"Enter Classroom"}
+              {!subSnaps?.[index].empty ? (entering && tName === topic.id) ? "Entering...": "Redo" : entering ? 'Entering...' : "Enter Classroom"}
             </button>
 
             <button
-            disabled={!localStorage.getItem(`LQN${topic.id}`)}
+            disabled={!localStorage.getItem(`LQN${topic.id}`) || (resuming && tName === topic.id)}
               className={
                 showOptions.id === topic.id && showOptions.show
                   ? "action"
@@ -225,12 +263,13 @@ useEffect(() => {
               }
               onClick={() => handleResume(topic.id)}
             >
-              Resume
+              { (resuming && tName === topic.id) ? 'Resuming' : 'Resume'}
             </button>            
           </div>
         </div>
       ))}
     </div>
+    </>
   );
 };
 

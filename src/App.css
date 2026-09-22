@@ -1661,3 +1661,12 @@ input:-webkit-autofill:active {
     padding: 30px 5%;
   }
 }
+
+.give-up {
+  display: flex; 
+  align-items: center;
+  position: relative; 
+  top: 2px; 
+  right: 2px; 
+  z-index: 999; 
+}

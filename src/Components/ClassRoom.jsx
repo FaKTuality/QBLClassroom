@@ -6,7 +6,7 @@ import { useAuth } from "../store/authProvider";
 import { Notif } from "./Notif";
 import { RevolvingDot } from "react-loader-spinner";
 import { useTopicChange, parseTopic, parseCode } from "../Hooks";
-
+import { FaDoorOpen } from "react-icons/fa";
 
 const errorMessages = {
   "auth/user-not-found":
@@ -187,6 +187,7 @@ export const ClassRoom = () => {
   const lastIndex = questions.length - 1;
   const finalQuestion = counter === lastIndex;
   const changedTopics = useTopicChange(); 
+  const [ givingUp, setGivingUp ] = useState(false); 
 
 
 const fisherYates = (array) => {
@@ -200,6 +201,7 @@ const fisherYates = (array) => {
 
   return shuffled;
 };
+
 
 
   useEffect(() => {
@@ -256,6 +258,9 @@ const fisherYates = (array) => {
 
     
   }, [studentId, topicName]);
+
+
+
 
   if (authLoading || loading) {
     return (
@@ -339,6 +344,8 @@ const fisherYates = (array) => {
         localStorage.removeItem(`${docSnap.id}${topicName}`)
     });
 
+    const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
+    await setDoc(docRef,{ inClass: false}, { merge: true });    
     localStorage.removeItem(`LQN${topicName}`)
     localStorage.removeItem('qNoArr')     
 
@@ -378,6 +385,25 @@ const fisherYates = (array) => {
     }
   };
 
+  const handleGiveUp = async() => {
+    setSubmitError(null); 
+    try {
+      setGivingUp(true); 
+      const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
+      await setDoc(docRef,{ inClass: true}, { merge: true });   
+      navigate("/navstu/viewtopicsstudent", { state: { userId: studentId, studentName, }}); 
+    } catch(e) {
+      setSubmitError(
+        !navigator.onLine
+        ? "You're currently offline. Please reconnect to the internet and try again."
+        : errorMessages[e.code] ?? "Something went wrong. Please try again."        
+      );
+    } finally {
+      setGivingUp(false); 
+    }
+       
+  }
+
   const docSnap = questions[counter];
   const question = docSnap?.data();
 
@@ -386,7 +412,13 @@ const fisherYates = (array) => {
   const { additionalMediaType, additionalMediaLink } = question;
 
   return (
-    <div className="center_piece">
+    <>
+        
+    <div className="center_piece relative" style={{marginTop: '7px'}}>
+      <button className="button give-up" style={{color: "red"}} disabled={givingUp} onClick={handleGiveUp}>
+        <FaDoorOpen/>
+        <span>{givingUp ? 'Giving Up...' : 'Give Up'}</span>
+      </button>
       {showNotif && (
         <Notif
           operation="submit-answers"
@@ -396,10 +428,10 @@ const fisherYates = (array) => {
 
 
       {submitError && (
-        <p className="error-message">{submitError}</p>
+        <p className="error-message centered">{submitError}</p>
       )}
 
-      <h2 className="centered">{parseCode(parseTopic(topicName, changedTopics))}</h2>
+      <h2 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicName, changedTopics))}</h2>
 
       <div className="question-details">
         <div className="q-number">
@@ -532,6 +564,7 @@ const fisherYates = (array) => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

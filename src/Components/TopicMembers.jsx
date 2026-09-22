@@ -64,7 +64,9 @@ export const TopicMembers = () => {
   const { currentUser: user, loading: authLoading} = useAuth()
   const changedNames = useNameChange(); 
   const changedTopics = useTopicChange(); 
+
   const handleQuestions = (topicInfo) => {
+    console.log("topicMembers topicInfo", topicInfo.students)
     navigate('/navtut/topicquestions', { state: topicInfo })
   }
 

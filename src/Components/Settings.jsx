@@ -23,7 +23,7 @@ import {
   deleteUser,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { arrayRemove, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, collection, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "../store/authProvider";
 import { Eye, EyeOff } from "lucide-react";
 import { usePasswordVisibility } from "../Hooks/index.jsx";
@@ -334,9 +334,32 @@ const manageDelete = async () => {
         
         await Promise.all([deleteDoc(doc(db, "users", auth?.currentUser?.uid)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid))]);
       } else {
+        const recDel = async () => {
+          const colRef = collection(db, `admin/${auth?.currentUser?.uid}/topics`)
+          const querySnap = await getDocs(colRef); 
+          const allProm1 = querySnap.docs.map(async (docSnap) => {
+            const colRef2 = collection(db, "admin", auth?.currentUser?.uid, "topics", docSnap.id, "questions"); 
+            const questionColQSnap = await getDocs(colRef2);
+            const allProm2 = questionColQSnap.docs.map((docSnap1) => {
+              const ref = doc(colRef, docSnap.id, "questions", docSnap1.id);
+              return deleteDoc(ref);             
+            })
+            await Promise.all(allProm2);
+          })
+
+          await Promise.all(allProm1)
+          const allProm3 = querySnap.docs.map((docSnap) => {
+            const ref = doc(db, `admin/${auth?.currentUser?.uid}/topics/${docSnap.id}`)
+            return deleteDoc(ref); 
+          })
+          await Promise.all(allProm3);            
+        
+       
         const docSnap = await getDoc(doc(db, "admin", auth?.currentUser?.uid))
         const { inviteDoc } = docSnap.data() || {}
-        await Promise.all([deleteDoc(doc(db, "admin", auth?.currentUser?.uid)), deleteDoc(doc(db, "admin", inviteDoc)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid)) ])
+        await Promise.all([deleteDoc(doc(db, "admin", auth?.currentUser?.uid)), deleteDoc(doc(db, "admin", inviteDoc)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid)) ])          
+        }
+
       }      
       await deleteUser(auth?.currentUser); 
       
@@ -373,7 +396,7 @@ const handleDeleteEmail = async (values, { setSubmitting }) => {
         await Promise.all([deleteDoc(doc(db, "admin", auth?.currentUser?.uid)), deleteDoc(doc(db, "admin", inviteDoc)), deleteDoc(doc(db, "persistentInfo", auth?.currentUser?.uid)) ]) 
      }
       await deleteUser(auth?.currentUser); 
-              
+      localStorage.clear();               
   } catch(e) {
     setMessage(  !navigator.onLine
     ? "You're currently offline. Please reconnect to the internet and try again."

@@ -1,4 +1,4 @@
-import { getDocs, deleteDoc, collection } from "firebase/firestore";
+import { getDocs, deleteDoc, collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom"
 import { TopicConfig } from "./TopicConfig";
@@ -9,7 +9,7 @@ import { useNameChange, parseName } from "../Hooks";
 import { useTopicChange, parseTopic, parseCode } from "../Hooks";
 import GoogleAds from "./AdComponent.jsx"; 
 import { useSelector } from "react-redux";
-
+import { useAuth } from "../store/authProvider.jsx";
 
 const getWikimediaCommonsFileUrl = (trimmedUrl) => {
   const wikiRegex = /^https?:\/\/commons\.wikimedia\.org\/wiki\/File:(.+)$/i;
@@ -160,13 +160,21 @@ const errorMessages = {
 
 
 export const TopicQuestions = ( )=> {
+  const { currentUser: user, loading: authLoading} = useAuth()
+  const tutorId = user?.uid
   const location = useLocation(); 
   const navigate = useNavigate(); 
   const topicInfo = location.state;
+  const { topicName, tutorView } = topicInfo; 
+  const [ questionNo, setQuestionNo ] = useState(null); 
+  const [ deletingErr, setDeletingErr ] = useState(false); 
+  const [ deletingTV, setDeletingTV ] = useState(false); 
   const [selected, setSelected] = useState('')
   const [responseInfo, setResponseInfo] = useState(null);
-  const [ showNotif, setShowNotif ] = useState(false)
+  const [ showNotif, setShowNotif ] = useState(false); 
+  const [ showNotif2, setShowNotif2 ] = useState(false); 
   const [ showModal, setShowModal ] = useState(false); 
+  const [ showModal2, setShowModal2 ] = useState(false); 
   const [ loading, setLoading ] = useState(true); 
   const [ error, setError ] = useState(null); 
   const [ querySnap, setQuerySnap ] = useState([]); 
@@ -180,14 +188,24 @@ export const TopicQuestions = ( )=> {
   const [ showMedia, setShowMedia ] = useState(false); 
   const changedNames = useNameChange(); 
   const changedTopics = useTopicChange(); 
+  const [ inClass, setInClass ] = useState(null); 
   
   useEffect(() => {
+    
+    if(!tutorView) {
+      const docRef = doc(db, "users", topicInfo.studentId, "classRoomState", topicInfo.topicName);
+      var unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setInClass(docSnap.data().inClass);
+        }
+      });        
+    }
+  
     const fetchQuestions = async () => {
       try {
         setError(null)
         const colRef = collection(db, `users/${topicInfo.studentId}/topics/${topicInfo.topicName}/questions`);
-        const querySnap = await getDocs(colRef) ;
-         
+        const querySnap = await getDocs(colRef);         
         setQuerySnap(querySnap); 
       } catch(e) {
         setError(
@@ -199,7 +217,27 @@ export const TopicQuestions = ( )=> {
         setLoading(false); 
       }
     }
-    fetchQuestions(); 
+
+    const fetchQuestionsTV = async () => {
+      try {
+        setError(null)
+        const colRef = collection(db, `admin/${tutorId}/topics/${topicName}/questions`);
+        const querySnap = await getDocs(colRef) ;
+         
+        setQuerySnap(querySnap); 
+      } catch(e) {
+        setError(
+          !navigator.onLine
+            ? "You're currently offline. Please reconnect to the internet and try again."
+            : errorMessages[e.code] ?? "Something went wrong. Please try again."
+        );
+      } finally {
+        setLoading(false); 
+      }      
+    }
+
+    tutorView? fetchQuestionsTV() : fetchQuestions(); 
+    return unsubscribe; 
   }, [topicInfo.studentId, topicInfo.topicName, showModal, showNotif])
 
   if(loading) {
@@ -221,31 +259,75 @@ export const TopicQuestions = ( )=> {
 
 
   const handleEdit = (questionInfo) => {
-    const topicConfigSerial = JSON.stringify({ 
-      topicName: topicInfo.topicName,
-      students: topicInfo.students, 
-      studentId: topicInfo.studentId,
-      name: topicInfo.name, 
-      isEditing: true,
-    })
-    localStorage.setItem("topicConfig", topicConfigSerial);
-    const questionInfoSerial = JSON.stringify(questionInfo); 
-    localStorage.setItem('questionInfo', questionInfoSerial);
-    setEditing(true); 
+    if(!inClass) {
+      const topicConfigSerial = JSON.stringify({ 
+        topicName: topicInfo.topicName,
+        students: topicInfo.students, 
+        studentId: topicInfo.studentId,
+        name: topicInfo.name, 
+        isEditing: true,
+      })
+      console.log(topicInfo.students)
+      localStorage.setItem("topicConfig", topicConfigSerial);
+      const questionInfoSerial = JSON.stringify(questionInfo); 
+      localStorage.setItem('questionInfo', questionInfoSerial);
+      setEditing(true);       
+    } else {
+      setShowNotif2(true); 
+    }
     
   }
 
   const handleDelete = async (questionNumber) => {
-    const topicConfigSerial = JSON.stringify({ 
-      topicName: topicInfo.topicName,
-      students: topicInfo.students,
-      isDeleting: true,
-    })
-    localStorage.setItem("topicConfig", topicConfigSerial);    
-    const questionInfoSerial = JSON.stringify({ questionNumber })
-    localStorage.setItem('questionInfo', questionInfoSerial)
-    setDeleting(true); 
+    if(!inClass) {
+      const topicConfigSerial = JSON.stringify({ 
+        topicName: topicInfo.topicName,
+        students: topicInfo.students,
+        isDeleting: true,
+      })
+      localStorage.setItem("topicConfig", topicConfigSerial);    
+      const questionInfoSerial = JSON.stringify({ questionNumber })
+      localStorage.setItem('questionInfo', questionInfoSerial)
+      setDeleting(true); 
+    } else {
+      setShowNotif2(true); 
+    }
   }
+
+
+  const handleEditTV = (questionInfo) => {
+    const questionState = {
+      topicName,
+      isEditing: true,
+      ...questionInfo, 
+    }
+    navigate('/navtut/questionFormTV', { state: questionState})    
+  };
+
+  const handleDeleteTV = async () => {
+    setDeletingErr(false); 
+    try {
+      setDeletingTV(true); 
+      const docRef = doc(db, "admin", tutorId, "topics", topicName, "questions", questionNo)
+      await deleteDoc(docRef); 
+      setShowModal2(false)
+      setShowNotif(true); 
+    } catch(e) {
+      setDeletingErr(
+        !navigator.onLine
+        ? "You're currently offline. Please reconnect to the internet and try again."
+        : errorMessages[e.code] ?? "Something went wrong. Please try again."        
+      )      
+    } finally {
+      setDeletingTV(false); 
+    }
+  }
+
+  const confirmDelete = (questionNumber) => {
+    setQuestionNo(questionNumber); 
+    setShowModal2(true); 
+  }
+
 
 
   const handleShowOptions = (questionNumber) => {
@@ -285,9 +367,12 @@ export const TopicQuestions = ( )=> {
       <div style={{display: "flex", flexDirection: 'column', gap: "0px"}}>
         <h3 className="centered">Questions for <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h3> 
         <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicInfo.topicName, changedTopics))}</h3>
+        {!tutorView && inClass && <h3 style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</h3>}
+        {!tutorView && !inClass && <h3 style={{color: 'red'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</h3>}
       </div>        
         
-        {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}
+        {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}     
+        {showNotif2 && <Notif operation={"in-class"} setShowNotif={setShowNotif2}/>} 
         {querySnap.docs.length === 0 ? 
         <p className="centered">No questions have been added to this topic</p>
       
@@ -334,8 +419,11 @@ export const TopicQuestions = ( )=> {
                   })}
                 </ul>
                 <div className={` ${showOptions.id === docSnap.id && showOptions.show ? 'action-group' : 'hidden'}`}>
-                  <div className="action" onClick={()=> {handleEdit({ questionData: docSnap.data(), questionNumber: docSnap.id})}}>Edit</div>
-                  <div className="action" onClick={() => {handleDelete(docSnap.id)}}>Delete</div>
+                  <div className="action" 
+                  onClick={tutorView ? () => handleEditTV({ questionData: docSnap.data(), questionNumber: docSnap.id}) : 
+                  ()=> {handleEdit({ questionData: docSnap.data(), questionNumber: docSnap.id})}}>Edit</div>
+                  <div className="action" 
+                  onClick={tutorView ? () => confirmDelete(docSnap.id) : () => {handleDelete(docSnap.id)}}>Delete</div>
                 </div>                
               </div>
 
@@ -385,6 +473,20 @@ export const TopicQuestions = ( )=> {
           </div>
         </div>
       )}
+
+      { showModal2 && 
+      <div className="modal">
+        <div className="modal-content">
+          <div onClick={() => setShowModal2(false)} className="close-modal">&times;</div>
+          <h4 className="header-centered">Confirm Delete</h4>
+          <p>Are you sure you want to delete this question?</p>
+          <button 
+            disabled={deletingTV}
+            onClick={handleDeleteTV} className="button centered">{deletingTV ? 'deleting...' : 'Confirm'}</button>
+            {deletingErr && <p className="error-message">{deletingErr}</p>}
+            
+        </div>
+      </div>}       
 
       </div>
     </>
