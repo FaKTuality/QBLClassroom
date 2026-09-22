@@ -162,7 +162,7 @@ useEffect(() => {
       setTName(topicName)
       setEntering(true); 
       const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
-      await setDoc(docRef,{ inClass: true}, { merge: true });
+      await setDoc(docRef,{ inClass: true, inSession: true}, { merge: true });
       navigate("/class", {
         state: { topicName, studentName },
       });
@@ -185,7 +185,7 @@ useEffect(() => {
       setTName(topicName)
       setResuming(true); 
       const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
-      await setDoc(docRef,{ inClass: true}, { merge: true });    
+      await setDoc(docRef,{ inClass: true, inSession: true}, { merge: true });    
       const bookmark = localStorage.getItem(`LQN${topicName}`)
       const LQN = bookmark ? JSON.parse(bookmark) : null
       

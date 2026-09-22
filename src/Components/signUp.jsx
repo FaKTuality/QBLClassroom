@@ -209,6 +209,12 @@ const startTimer = () => {
   const onSubmit = async (values, { setSubmitting, setStatus, resetForm}) => {
     setStatus(null); 
     try {
+
+        const credential = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password);
+      
         if(inviteDoc) {
           const inviteRef = doc(db, `admin/${inviteDoc}`);
           const inviteSnap = await getDoc(inviteRef);
@@ -216,12 +222,7 @@ const startTimer = () => {
           if (!inviteSnap.exists()) {
             throw new Error("Invalid invite link");
           }           
-        }
-        const credential = await createUserWithEmailAndPassword(
-        auth,
-        values.email,
-        values.password);
-      
+        }        
         await sendEmailVerification(credential.user); 
         startTimer()
         setFirst(true); 

@@ -345,7 +345,7 @@ const fisherYates = (array) => {
     });
 
     const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
-    await setDoc(docRef,{ inClass: false}, { merge: true });    
+    await setDoc(docRef,{ inClass: false, inSession: false}, { merge: true });    
     localStorage.removeItem(`LQN${topicName}`)
     localStorage.removeItem('qNoArr')     
 
@@ -390,7 +390,7 @@ const fisherYates = (array) => {
     try {
       setGivingUp(true); 
       const docRef = doc(db, "users", studentId, "classRoomState", topicName, );
-      await setDoc(docRef,{ inClass: true}, { merge: true });   
+      await setDoc(docRef,{ inClass: false, inSession: true }, { merge: true });   
       navigate("/navstu/viewtopicsstudent", { state: { userId: studentId, studentName, }}); 
     } catch(e) {
       setSubmitError(

@@ -22,7 +22,7 @@ export const Notif = ({ operation, setShowNotif, questionNumber, account, studen
   if (operation === "in-class") {
     return (
       <div className="notif-red">
-       Unavailable while student is in class
+       Unavailable while student is in session
       </div>
     );
   }
