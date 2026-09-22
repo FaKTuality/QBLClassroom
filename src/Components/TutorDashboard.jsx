@@ -167,7 +167,7 @@ export const TutorDashboard = () => {
       
       <div className="listItem">
         <p onClick={handleViewTopic} className="button">View Topics</p>
-        <img src="../viewTopics..webp" alt="this image cannot be displayed" className="view-topics"/>
+        <img src="../viewTopics.webp" alt="this image cannot be displayed" className="view-topics"/>
         <img src="../viewTopicsMobile.webp" alt="this image cannot be displayed" 
         className="view-topics-mobile"/>
         
@@ -175,7 +175,7 @@ export const TutorDashboard = () => {
       
       <div className="listItem">
         <p onClick={handleAddTopic} className="button">Add Topic</p>
-        <img src="../addTopic..webp" alt="this image cannot be displayed" className="add-topic"/>
+        <img src="../addTopic.webp" alt="this image cannot be displayed" className="add-topic"/>
         <img src="../addTopicMobile.webp" alt="this image cannot be displayed" 
         className="add-topic-mobile"/>        
       </div>

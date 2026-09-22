@@ -130,8 +130,8 @@ export const StudentDashboard = () => {
         >
           View Topics
         </p>
-        <img src="../viewTopicsStudent..webp" alt="this image cannot be displayed" className="view-topics"/>
-        <img src="../viewTopicsStudentMobile..webp" alt="this image cannot be displayed" className="view-topics-mobile"/>
+        <img src="../viewTopicsStudent.webp" alt="this image cannot be displayed" className="view-topics"/>
+        <img src="../viewTopicsStudentMobile.webp" alt="this image cannot be displayed" className="view-topics-mobile"/>
       </div>
     </div>
   );
