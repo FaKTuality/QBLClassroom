@@ -198,8 +198,8 @@ export const TopicQuestions = ( )=> {
       var unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           setClassStatus({
-            inClass: docSnap.data().inClass, 
-            inSession: docSnap.data().inSession, 
+            inClass: docSnap.data()?.inClass, 
+            inSession: docSnap.data()?.inSession, 
           })
         }
       });        
@@ -369,9 +369,9 @@ export const TopicQuestions = ( )=> {
       <div style={{display: "flex", flexDirection: 'column', gap: "0px"}}>
         <h3 className="centered">Questions for <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h3> 
         <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicInfo.topicName, changedTopics))}</h3>
-        {!tutorView && ClassRoomStatus.inClass && <h4 style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</h4>}
-        {!tutorView && !ClassRoomStatus.inClass && <h4 style={{color: 'red'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</h4>}
-        {!tutorView && !ClassRoomStatus.inClass && ClassRoomStatus.inSession && <h4 style={{color: 'green'}} className="centered">In session</h4>}
+        {!tutorView && ClassRoomStatus?.inClass && <h4 style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</h4>}
+        {!tutorView && !ClassRoomStatus?.inClass && <h4 style={{color: 'red'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</h4>}
+        {!tutorView && !ClassRoomStatus?.inClass && ClassRoomStatus.inSession && <h4 style={{color: 'green'}} className="centered">In session</h4>}
       </div>        
         
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}     
