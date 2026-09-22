@@ -263,7 +263,7 @@ export const TopicQuestions = ( )=> {
 
 
   const handleEdit = (questionInfo) => {
-    if(!ClassRoomStatus.inSession) {
+    if(!ClassRoomStatus?.inSession) {
       const topicConfigSerial = JSON.stringify({ 
         topicName: topicInfo.topicName,
         students: topicInfo.students, 
@@ -283,7 +283,7 @@ export const TopicQuestions = ( )=> {
   }
 
   const handleDelete = async (questionNumber) => {
-    if(!ClassRoomStatus.inSession) {
+    if(!ClassRoomStatus?.inSession) {
       const topicConfigSerial = JSON.stringify({ 
         topicName: topicInfo.topicName,
         students: topicInfo.students,
@@ -371,7 +371,7 @@ export const TopicQuestions = ( )=> {
         <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicInfo.topicName, changedTopics))}</h3>
         {!tutorView && ClassRoomStatus?.inClass && <h4 style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</h4>}
         {!tutorView && !ClassRoomStatus?.inClass && <h4 style={{color: 'red'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</h4>}
-        {!tutorView && !ClassRoomStatus?.inClass && ClassRoomStatus.inSession && <h4 style={{color: 'green'}} className="centered">In session</h4>}
+        {!tutorView && !ClassRoomStatus?.inClass && ClassRoomStatus?.inSession && <h4 style={{color: 'green'}} className="centered">In session</h4>}
       </div>        
         
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}     
