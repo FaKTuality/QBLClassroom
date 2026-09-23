@@ -165,7 +165,7 @@ useEffect(() => {
       } 
       return Promise.all([
         setDoc(docRef, newValues), 
-        topicConfig.isEditing && setDoc(doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`), newValues), 
+        !topicConfig.isEditing && setDoc(doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`), newValues), 
         setDoc(doc(db, `users/${student.studentId}/topics/${topicName}`),{ createdAt: serverTimestamp()})
       ]) ; 
     }
@@ -451,3 +451,4 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
     </div>
   )
 }  
+
