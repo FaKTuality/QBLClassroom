@@ -115,5 +115,12 @@ export const Notif = ({ operation, setShowNotif, questionNumber, account, studen
       </div>
     )
   }    
+  if (operation === "not-so-fast") {
+    return (
+      <div className="notif-red">
+        Not so fast!.
+      </div>
+    );
+  }  
 
 };

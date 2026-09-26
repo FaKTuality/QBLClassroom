@@ -18,6 +18,7 @@ export const ClassRoom = () => {
   const studentName = location.state?.studentName
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true);
+  const [notifOperation, setNotifOperation] = useState("submit-answers");
   const [error, setError] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [responseInfo, setResponseInfo] = useState(null);
@@ -38,6 +39,8 @@ export const ClassRoom = () => {
   const finalQuestion = counter === lastIndex;
   const changedTopics = useTopicChange(); 
   const [ givingUp, setGivingUp ] = useState(false); 
+  const [lastSelectionTime, setLastSelectionTime] = useState(0);
+  const SELECTION_COOLDOWN = 80000;
 
 
 const fisherYates = (array) => {
@@ -134,6 +137,14 @@ const fisherYates = (array) => {
   const closeModal = () => setShowModal(false);
 
   const handleClick = (question, option, questionNumber) => {
+    if (option.text !== chosenOption && Date.now() - lastSelectionTime < SELECTION_COOLDOWN) {
+      setNotifOperation("not-so-fast");
+      setShowNotif(true);
+      return;
+    }
+
+    setLastSelectionTime(Date.now());
+
     setResponseInfo({
       responseType: option.responseType,
       responsePayload: option.responsePayload,
@@ -159,6 +170,12 @@ const fisherYates = (array) => {
   };
 
   const handleSubmit = async () => {
+    const storedItem = localStorage.getItem(`${questionNumber}${topicName}`)
+    
+    if(storedItem === null) {
+      alert("select an option first")
+      return; 
+    }
     setSubmitting(true);
     const submittedAt = serverTimestamp(); 
     const attemptedQuestions = [];
@@ -271,7 +288,7 @@ const fisherYates = (array) => {
       </button>
       {showNotif && (
         <Notif
-          operation="submit-answers"
+          operation={notifOperation}
           setShowNotif={setShowNotif}
         />
       )}
