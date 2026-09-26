@@ -305,20 +305,27 @@ const fisherYates = (array) => {
           Question {counter + 1} of {questions.length}
         </div>
 
-        {additionalMediaType === "video" && (
-          <div>
-          <iframe
-            width="560"
-            height="315"
-            src={getYouTubeEmbedUrl(additionalMediaLink, { autoplay: true, controls: false})}
-            title="YouTube video player"
-            frameBorder="0"
-            autoplay={true}
-            >
-          </iframe>
-          </div>
+            {additionalMediaType === "video" && (() => {
+              const video = getVideoEmbed(additionalMediaLink);
+              if (!video) return null;
 
-        )}
+              return video.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="400"
+                  src={video.url}
+                  title="Video player"
+                  frameBorder="0"
+                />
+              ) : (
+                <video
+                  width="100%"
+                  height="100%"
+                  src={video.url}
+                  controls
+                />
+              );
+            })()} 
 
         {additionalMediaType === "image" && (
           <img
@@ -328,13 +335,23 @@ const fisherYates = (array) => {
           />
         )}
 
-        {additionalMediaType === "audio" && (
-          <audio
-            className="q-media"
-            src={getDirectAudioUrl(additionalMediaLink)}
-            controls
-          />
-        )}
+
+            {additionalMediaType === "audio" && (() => {
+              const audio = getAudioEmbed(additionalMediaLink);
+              if (!audio) return null;
+
+              return audio.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={audio.url}
+                  title="Audio player"
+                  frameBorder="0"
+                />
+              ) : (
+                <audio src={audio.url} controls />
+              );
+            })()}
 
         <div className="q-text">{parseCode(question.questionText)}</div>
 

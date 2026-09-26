@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Notif } from "./Notif";
-import { parseCode } from "../Helpers";
+import { parseCode, getAudioEmbed, getDirectImageUrl, getVideoEmbed } from "../Helpers";
+
 
 const DEMO_KEY_PREFIX = "demoClassroom";
 const TOPIC_NAME = "Voltage"; // hardcode your topic display name here
@@ -37,7 +38,7 @@ const DEMO_QUESTIONS = [
       {
         text: "electricity",
         responseType: "text",
-        responsePayload: "you're not entirely wrong. a charge is related to electricity",
+        responsePayload: "you're not entirely wrong. A charge is related to electricity",
       },
       {
         text: "a property of certain fundamental particles",
@@ -48,7 +49,7 @@ const DEMO_QUESTIONS = [
   },
   {
     id: "question0002",
-    questionText: "what is an electric field?",
+    questionText: "What is an electric field?",
     additionalMediaType: "image",
     additionalMediaLink: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/VFPt_charges_plus_minus_thumb.svg/500px-VFPt_charges_plus_minus_thumb.svg.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
     options: [
@@ -78,14 +79,14 @@ const DEMO_QUESTIONS = [
   },
   {
     id: "question0003",
-    questionText: `So far, we know that having a charge allows a particle to have an electric field. \Well having a charge also allows a particle to experience a force in an electric field. \
-An important concept to understand is the concept of work. People noticed that an object needed to have something in order for its \
-state of motion to change from rest (to get it moving from when it wasn't moving). They called this thing energy. People also noticed\
-that it was often supplied by a force. As usual, people would always find a way to measure things \
-(I'm taller than you; I'm faster than you etc.), so they found a way to measure energy; since the energy was \
-transferred by a force, the energy transferred from the force to the object is the same as the energy possessed by the object after the transfer (the \
-amount of money transferred is the same as the balance of the recipient, if they had no money before). The\
-amount of energy transferred is called work. so what is worK? `,
+    questionText: `So far, we know that having a charge allows a particle to have an electric field. Well, having a charge also allows a particle to experience a force in an electric field.
+An important concept to understand is the concept of work. People noticed that an object needed to have something in order for its
+state of motion to change from rest (to get it moving from when it wasn't moving). They called this thing energy. People also noticed
+that it was often supplied by a force. As usual, people would always find a way to measure things
+(I'm taller than you; I'm faster than you etc.), so they found a way to measure energy; since the energy was
+transferred by a force, the energy transferred from the force to the object is the same as the energy possessed by the object after the transfer (the
+amount of money transferred is the same as the balance of the recipient, if they had no money before). The
+amount of energy transferred is called work. So what is work?`,
     additionalMediaType: "image",
     additionalMediaLink: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Baseball_pitching_motion_2004.jpg/500px-Baseball_pitching_motion_2004.jpg?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
     options: [
@@ -95,7 +96,7 @@ amount of energy transferred is called work. so what is worK? `,
         responsePayload: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExenc1NWcybnE3eTNkY2Z1dzluaTVidm40bmF5amo2MmlmMTFiOGZsYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/1zSz5MVw4zKg0/200.webp",
       },
       {
-        text: "a measure of the amount of energy transferred by an object to a force ",
+        text: "a measure of the amount of energy transferred by an object to a force",
         responseType: "image",
         responsePayload: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExenc1NWcybnE3eTNkY2Z1dzluaTVidm40bmF5amo2MmlmMTFiOGZsYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/gnE4FFhtFoLKM/200w.webp",
       },
@@ -114,114 +115,7 @@ amount of energy transferred is called work. so what is worK? `,
 
 ];
 
-const getWikimediaCommonsFileUrl = (trimmedUrl) => {
-  const wikiRegex = /^https?:\/\/commons\.wikimedia\.org\/wiki\/File:(.+)$/i;
-  const match = trimmedUrl.match(wikiRegex);
-  if (!match || !match[1]) return null;
-  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(match[1])}`;
-};
 
-const isSafeHttpUrl = (value) => /^https?:\/\//i.test(value);
-
-const getYouTubeEmbedUrl = (url, options = {}) => {
-  if (!url || typeof url !== "string") return null;
-
-  let parsed;
-  try {
-    parsed = new URL(url.trim());
-  } catch {
-    return null;
-  }
-
-  const host = parsed.hostname.replace(/^www\./i, "").toLowerCase();
-  let videoId = null;
-
-  if (host === "youtu.be") {
-    videoId = parsed.pathname.split("/").filter(Boolean)[0] || null;
-  } else if (host === "youtube.com" || host === "m.youtube.com") {
-    if (parsed.pathname === "/watch") {
-      videoId = parsed.searchParams.get("v");
-    } else {
-      const segments = parsed.pathname.split("/").filter(Boolean);
-      if (["embed", "shorts", "live", "v"].includes(segments[0])) {
-        videoId = segments[1] || null;
-      }
-    }
-  } else {
-    return null;
-  }
-
-  if (!videoId || !/^[\w-]{11}$/.test(videoId)) return null;
-
-  const params = new URLSearchParams();
-  if (options.autoplay) params.append("autoplay", "1");
-  if (options.controls === false) params.append("controls", "0");
-
-  const queryString = params.toString();
-  return `https://www.youtube.com/embed/${videoId}${queryString ? `?${queryString}` : ""}`;
-};
-
-const getDirectImageUrl = (url) => {
-  if (!url || typeof url !== "string") return "";
-
-  const trimmedUrl = url.trim();
-
-  const giphyRegex = /^https?:\/\/(?:www\.)?giphy\.com\/gifs\/(?:[\w-]+-)?([a-zA-Z0-9]+)\/?$/i;
-  const giphyMatch = trimmedUrl.match(giphyRegex);
-  if (giphyMatch && giphyMatch[1]) {
-    return `https://i.giphy.com/media/${giphyMatch[1]}/giphy.gif`;
-  }
-
-  const imgurRegex = /^https?:\/\/imgur\.com\/([a-zA-Z0-9]+)(?:\..+)?$/i;
-  const imgurMatch = trimmedUrl.match(imgurRegex);
-  if (imgurMatch && imgurMatch[1]) {
-    return `https://i.imgur.com/${imgurMatch[1]}.png`;
-  }
-
-  const gDriveRegex = /^https?:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i;
-  const gDriveMatch = trimmedUrl.match(gDriveRegex);
-  if (gDriveMatch && gDriveMatch[1]) {
-    return `https://lh3.googleusercontent.com/d/${gDriveMatch[1]}`;
-  }
-
-  const wikiUrl = getWikimediaCommonsFileUrl(trimmedUrl);
-  if (wikiUrl) return wikiUrl;
-
-  return isSafeHttpUrl(trimmedUrl) ? trimmedUrl : "";
-};
-
-const getDirectAudioUrl = (url) => {
-  if (!url || typeof url !== "string") return "";
-
-  const trimmedUrl = url.trim();
-
-  const gDriveRegex = /^https?:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i;
-  const gDriveMatch = trimmedUrl.match(gDriveRegex);
-  if (gDriveMatch && gDriveMatch[1]) {
-    return `https://docs.google.com/uc?export=download&id=${gDriveMatch[1]}`;
-  }
-
-  if (trimmedUrl.includes("dropbox.com/")) {
-    try {
-      const dropboxUrl = new URL(trimmedUrl);
-      dropboxUrl.searchParams.delete("dl");
-      dropboxUrl.searchParams.set("raw", "1");
-      return dropboxUrl.toString();
-    } catch {
-    }
-  }
-
-  const vocarooRegex = /^https?:\/\/(?:www\.)?(?:vocaroo\.com|voca\.ro)\/([a-zA-Z0-9]+)/i;
-  const vocarooMatch = trimmedUrl.match(vocarooRegex);
-  if (vocarooMatch && vocarooMatch[1]) {
-    return `https://media.vocaroo.com/mp3/${vocarooMatch[1]}`;
-  }
-
-  const wikiUrl = getWikimediaCommonsFileUrl(trimmedUrl);
-  if (wikiUrl) return wikiUrl;
-
-  return isSafeHttpUrl(trimmedUrl) ? trimmedUrl : "";
-};
 
 const fisherYates = (array) => {
   const shuffled = [...array];
@@ -253,10 +147,12 @@ export const DemoClassRoom = () => {
   const [showModal, setShowModal] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
+  const [notifOperation, setNotifOperation] = useState("submit-answers");
   const question = questions[counter];
   const lastIndex = questions.length - 1;
   const finalQuestion = counter === lastIndex;
+  const [lastSelectionTime, setLastSelectionTime] = useState(0);
+  const SELECTION_COOLDOWN = 5000;
 
   const bookmark = question
     ? localStorage.getItem(`${DEMO_KEY_PREFIX}-${question.id}-${TOPIC_NAME}`)
@@ -279,6 +175,13 @@ export const DemoClassRoom = () => {
   const closeModal = () => setShowModal(false);
 
   const handleClick = (question, option) => {
+    if (option.text !== chosenOption && Date.now() - lastSelectionTime < SELECTION_COOLDOWN) {
+      setNotifOperation("not-so-fast");
+      setShowNotif(true);
+      return;
+    }
+
+    setLastSelectionTime(Date.now());    
     setResponseInfo({
       responseType: option.responseType,
       responsePayload: option.responsePayload,
@@ -338,7 +241,7 @@ export const DemoClassRoom = () => {
     <div className="center_piece">
       {showNotif && (
         <Notif
-          operation="submit-answers"
+          operation={notifOperation}
           setShowNotif={setShowNotif}
         />
       )}
@@ -349,20 +252,27 @@ export const DemoClassRoom = () => {
         <div className="q-number">
           Question {counter + 1} of {questions.length}
         </div>
+            {additionalMediaType === "video" && (() => {
+              const video = getVideoEmbed(additionalMediaLink);
+              if (!video) return null;
 
-        {additionalMediaType === "video" && (
-          <div>
-            <iframe
-              width="560"
-              height="315"
-              src={getYouTubeEmbedUrl(additionalMediaLink, { autoplay: true, controls: false })}
-              title="YouTube video player"
-              frameBorder="0"
-              autoplay={true}
-            >
-            </iframe>
-          </div>
-        )}
+              return video.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="400"
+                  src={video.url}
+                  title="Video player"
+                  frameBorder="0"
+                />
+              ) : (
+                <video
+                  width="100%"
+                  height="100%"
+                  src={video.url}
+                  controls
+                />
+              );
+            })()} 
 
         {additionalMediaType === "image" && (
           <img
@@ -372,13 +282,22 @@ export const DemoClassRoom = () => {
           />
         )}
 
-        {additionalMediaType === "audio" && (
-          <audio
-            className="q-media"
-            src={getDirectAudioUrl(additionalMediaLink)}
-            controls
-          />
-        )}
+            {additionalMediaType === "audio" && (() => {
+              const audio = getAudioEmbed(additionalMediaLink);
+              if (!audio) return null;
+
+              return audio.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={audio.url}
+                  title="Audio player"
+                  frameBorder="0"
+                />
+              ) : (
+                <audio src={audio.url} controls />
+              );
+            })()}
 
         <div className="q-text">{parseCode(question.questionText)}</div>
 
@@ -420,24 +339,44 @@ export const DemoClassRoom = () => {
               />
             )}
 
-            {responseInfo.responseType === "video" && (
-              <iframe
-                width="100%"
-                height="100%"
-                src={getYouTubeEmbedUrl(responseInfo.responsePayload, { autoplay: true, controls: false })}
-                title="YouTube video player"
-                frameBorder="0"
-              >
-              </iframe>
-            )}
+            {responseInfo.responseType === "video" && (() => {
+              const video = getVideoEmbed(responseInfo.responsePayload);
+              if (!video) return null;
 
-            {responseInfo.responseType === "audio" && (
-              <audio
-                className="q-media"
-                src={getDirectAudioUrl(responseInfo.responsePayload)}
-                controls
-              />
-            )}
+              return video.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="400"
+                  src={video.url}
+                  title="Video player"
+                  frameBorder="0"
+                />
+              ) : (
+                <video
+                  width="100%"
+                  height="100%"
+                  src={video.url}
+                  controls
+                />
+              );
+            })()}   
+
+            {responseInfo.responseType === "audio" && (() => {
+              const audio = getAudioEmbed(responseInfo.responsePayload);
+              if (!audio) return null;
+
+              return audio.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={audio.url}
+                  title="Audio player"
+                  frameBorder="0"
+                />
+              ) : (
+                <audio src={audio.url} controls />
+              );
+            })()}
           </div>
         </div>
       )}
