@@ -5,10 +5,9 @@ import { AuthContext } from "./authProvider";
 import { useContext } from "react";
 
 export const configureTopic = createAsyncThunk('users/topics', async ({tutorId, topicConfig}) => {
-  const selectedStudents = topicConfig.students.filter((student)=> student.included )
   const finalTopicConfig = {
     topicName: topicConfig.topicName, 
-    students: selectedStudents,
+    students: [],
     createdAt: serverTimestamp(),
     deleteCount: 0
   }

@@ -13,43 +13,9 @@ import { useAuth } from "../store/authProvider";
 import { RevolvingDot } from "react-loader-spinner";
 import { Notif } from "./Notif";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTopicChange, useNameChange, parseTopic, parseCode, parseName } from "../Hooks";
+import { useTopicChange, useNameChange } from "../Hooks";
 import { useFormikContext } from "formik";
-const errorMessages = {
-  "auth/user-not-found":
-    "No account exists with that email address.",
-
-  "auth/wrong-password":
-    "The password you entered is incorrect.",
-
-  "auth/invalid-email":
-    "Please enter a valid email address.",
-
-  "auth/email-already-in-use":
-    "An account with this email already exists.",
-
-  "auth/weak-password":
-    "Your password is too weak. Try using at least 6 characters.",
-
-  "auth/network-request-failed":
-    "It looks like you're offline. Please check your internet connection and try again.",
-
-  "auth/too-many-requests":
-    "Too many attempts detected. Please wait a few minutes and try again.",
-
-  "permission-denied":
-    "You don't have permission to perform this action.",
-
-  "not-found":
-    "The requested information could not be found.",
-
-  "unavailable":
-    "Our servers are temporarily unavailable. Please try again later.",
-
-  "deadline-exceeded":
-    "The request took too long to complete. Please try again."
-};
-
+import { errorMessages, parseTopic, parseCode } from "../Helpers/index.jsx";
 
 const DraftAutosave = () => {
   const { values } = useFormikContext();
@@ -135,6 +101,30 @@ useEffect(() => {
   }
     
 
+const GIPHY_API_KEY = "BLqobpfJuXnhksEpqt6qynVVXYGo8I7O"; // see note below
+
+const resolveGiphyVideoUrl = async (url) => {
+  console.log("resolveGiphyVideo running")
+  if (!url || typeof url !== "string") return url;
+
+  const giphyMediaRegex = /^https?:\/\/media\d*\.giphy\.com\/media\/.+\/([a-zA-Z0-9]+)\/giphy\.(?:gif|webp|mp4)$/i;
+  const match = url.match(giphyMediaRegex);
+  if (!match) return url; // not a Giphy link — leave untouched
+
+  const giphyId = match[1];
+  try {
+    console.log('calling giphy API')
+    const res = await fetch(`https://api.giphy.com/v1/gifs/${giphyId}?api_key=${GIPHY_API_KEY}`);
+    const json = await res.json();
+    const soundUrl = json?.data?.video?.assets?.["480p"]?.url;
+    console.log('soundUrl', soundUrl)
+    return soundUrl || url; // fall back to original if it's a plain GIF (no video object) or lookup fails
+
+  } catch {
+    return url; // network/API failure — don't block saving over this
+  }
+};  
+
   
   const handleSubmit = async (values, { resetForm, setStatus, setSubmitting }) => {
     if (!navigator.onLine) {
@@ -146,6 +136,16 @@ useEffect(() => {
     try{    
     const newValues = !values.additionalMediaType && values.additionalMediaLink ? {...values, additionalMediaLink: ''}: values;
 
+
+    const resolvedOptions = await Promise.all(
+      newValues.options.map(async (option) =>
+        option.responseType === "video"
+          ? { ...option, responsePayload: await resolveGiphyVideoUrl(option.responsePayload) }
+          : option
+      )
+    );
+    const finalValues = { ...newValues, options: resolvedOptions };
+
     const saveQuestion = async (questionNumber) => { 
       let docRef; 
       if(isEditing){
@@ -153,7 +153,7 @@ useEffect(() => {
       } else {
         docRef = doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`)
       } 
-      return setDoc(docRef, newValues)
+      return setDoc(docRef, finalValues)
     }
     
       await saveQuestion(questionNumber)

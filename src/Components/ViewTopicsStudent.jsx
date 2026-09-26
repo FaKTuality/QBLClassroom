@@ -3,47 +3,12 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../Firebase/index.js";
 import { RevolvingDot } from "react-loader-spinner";
-import { useThreeDots } from "../Hooks";
-import { useTopicChange, parseTopic, parseCode } from "../Hooks";
 import { useDispatch } from "react-redux";
 import { changeTopic } from "../store/topicConfigSlice";
 import GoogleAds from "./AdComponent.jsx"; 
 import { useSelector } from "react-redux";
-
-const errorMessages = {
-  "auth/user-not-found":
-    "No account exists with that email address.",
-
-  "auth/wrong-password":
-    "The password you entered is incorrect.",
-
-  "auth/invalid-email":
-    "Please enter a valid email address.",
-
-  "auth/email-already-in-use":
-    "An account with this email already exists.",
-
-  "auth/weak-password":
-    "Your password is too weak. Try using at least 6 characters.",
-
-  "auth/network-request-failed":
-    "It looks like you're offline. Please check your internet connection and try again.",
-
-  "auth/too-many-requests":
-    "Too many attempts detected. Please wait a few minutes and try again.",
-
-  "permission-denied":
-    "You don't have permission to perform this action.",
-
-  "not-found":
-    "The requested information could not be found.",
-
-  "unavailable":
-    "Our servers are temporarily unavailable. Please try again later.",
-
-  "deadline-exceeded":
-    "The request took too long to complete. Please try again."
-}
+import { useThreeDots, useTopicChange } from "../Hooks";
+import { errorMessages, parseTopic, parseCode } from "../Helpers/index.jsx";
 
 export const ViewTopicsStudent = () => {
   const location = useLocation();

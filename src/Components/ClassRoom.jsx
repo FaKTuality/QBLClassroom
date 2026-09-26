@@ -5,165 +5,9 @@ import { db } from "../../Firebase/index.js";
 import { useAuth } from "../store/authProvider";
 import { Notif } from "./Notif";
 import { RevolvingDot } from "react-loader-spinner";
-import { useTopicChange, parseTopic, parseCode } from "../Hooks";
+import { useTopicChange } from "../Hooks";
 import { FaDoorOpen } from "react-icons/fa";
-
-const errorMessages = {
-  "auth/user-not-found":
-    "No account exists with that email address.",
-
-  "auth/wrong-password":
-    "The password you entered is incorrect.",
-
-  "auth/invalid-email":
-    "Please enter a valid email address.",
-
-  "auth/email-already-in-use":
-    "An account with this email already exists.",
-
-  "auth/weak-password":
-    "Your password is too weak. Try using at least 6 characters.",
-
-  "auth/network-request-failed":
-    "It looks like you're offline. Please check your internet connection and try again.",
-
-  "auth/too-many-requests":
-    "Too many attempts detected. Please wait a few minutes and try again.",
-
-  "permission-denied":
-    "You don't have permission to perform this action.",
-
-  "not-found":
-    "The requested information could not be found.",
-
-  "unavailable":
-    "Our servers are temporarily unavailable. Please try again later.",
-
-  "deadline-exceeded":
-    "The request took too long to complete. Please try again."
-}
-
-
-
-const getWikimediaCommonsFileUrl = (trimmedUrl) => {
-  const wikiRegex = /^https?:\/\/commons\.wikimedia\.org\/wiki\/File:(.+)$/i;
-  const match = trimmedUrl.match(wikiRegex);
-  if (!match || !match[1]) return null;
-  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(match[1])}`;
-};
-
-const isSafeHttpUrl = (value) => /^https?:\/\//i.test(value);
-
-const getYouTubeEmbedUrl = (url, options = {}) => {
-  if (!url || typeof url !== "string") return null;
-
-  let parsed;
-  try {
-    parsed = new URL(url.trim());
-  } catch {
-    return null;
-  }
-
-  const host = parsed.hostname.replace(/^www\./i, "").toLowerCase();
-  let videoId = null;
-
-  if (host === "youtu.be") {
-    videoId = parsed.pathname.split("/").filter(Boolean)[0] || null;
-  } else if (host === "youtube.com" || host === "m.youtube.com") {
-    if (parsed.pathname === "/watch") {
-      videoId = parsed.searchParams.get("v");
-    } else {
-      const segments = parsed.pathname.split("/").filter(Boolean);
-      if (["embed", "shorts", "live", "v"].includes(segments[0])) {
-        videoId = segments[1] || null;
-      }
-    }
-  } else {
-    return null;
-  }
-
-  if (!videoId || !/^[\w-]{11}$/.test(videoId)) return null;
-
-  const params = new URLSearchParams();
-  if (options.autoplay) params.append("autoplay", "1");
-  if (options.controls === false) params.append("controls", "0");
-
-  const queryString = params.toString();
-  return `https://www.youtube.com/embed/${videoId}${queryString ? `?${queryString}` : ""}`;
-};
-
-const getDirectImageUrl = (url) => {
-  if (!url || typeof url !== "string") return "";
-
-  const trimmedUrl = url.trim();
-
-  const giphyRegex = /^https?:\/\/(?:www\.)?giphy\.com\/gifs\/(?:[\w-]+-)?([a-zA-Z0-9]+)\/?$/i;
-  const giphyMatch = trimmedUrl.match(giphyRegex);
-  if (giphyMatch && giphyMatch[1]) {
-    return `https://i.giphy.com/media/${giphyMatch[1]}/giphy.gif`;
-  }
-
-  const imgurRegex = /^https?:\/\/(?:www\.)?imgur\.com\/(?:gallery|a)\/(?:[a-zA-Z0-9-]*-)?([a-zA-Z0-9]{5,7})$/i;
-  const imgurMatch = trimmedUrl.match(imgurRegex);
-  if (imgurMatch && imgurMatch[1]) {
-    return `https://i.imgur.com/${imgurMatch[1]}.png`;
-  }
-
-  const imgurDirectRegex = /^https?:\/\/(?:www\.)?imgur\.com\/([a-zA-Z0-9]{5,7})(?:\.(?:jpe?g|png|gif|webp))?\/?$/i;
-  const imgurDirectMatch = trimmedUrl.match(imgurDirectRegex);
-  if (imgurDirectMatch && imgurDirectMatch[1]) {
-    return `https://i.imgur.com/${imgurDirectMatch[1]}.png`;
-  }
-
-  const gDriveRegex = /^https?:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i;
-  const gDriveMatch = trimmedUrl.match(gDriveRegex);
-  if (gDriveMatch && gDriveMatch[1]) {
-    return `https://lh3.googleusercontent.com/d/${gDriveMatch[1]}`;
-  }
-
-  const wikiUrl = getWikimediaCommonsFileUrl(trimmedUrl);
-  if (wikiUrl) return wikiUrl;
-
-  return isSafeHttpUrl(trimmedUrl) ? trimmedUrl : "";
-};
-
-const getDirectAudioUrl = (url) => {
-  if (!url || typeof url !== "string") return "";
-
-  const trimmedUrl = url.trim();
-
-  const gDriveRegex = /^https?:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i;
-  const gDriveMatch = trimmedUrl.match(gDriveRegex);
-  if (gDriveMatch && gDriveMatch[1]) {
-    return `https://docs.google.com/uc?export=download&id=${gDriveMatch[1]}`;
-  }
-
-  if (trimmedUrl.includes("dropbox.com/")) {
-    try {
-      const dropboxUrl = new URL(trimmedUrl);
-      dropboxUrl.searchParams.delete("dl");
-      dropboxUrl.searchParams.set("raw", "1");
-      return dropboxUrl.toString();
-    } catch {
-    }
-  }
-
-  const vocarooRegex = /^https?:\/\/(?:www\.)?(?:vocaroo\.com|voca\.ro)\/([a-zA-Z0-9]+)/i;
-  const vocarooMatch = trimmedUrl.match(vocarooRegex);
-  if (vocarooMatch && vocarooMatch[1]) {
-    return `https://media.vocaroo.com/mp3/${vocarooMatch[1]}`;
-  }
-
-  const wikiUrl = getWikimediaCommonsFileUrl(trimmedUrl);
-  if (wikiUrl) return wikiUrl;
-
-  return isSafeHttpUrl(trimmedUrl) ? trimmedUrl : "";
-};
-
-
-
-
-
+import { getAudioEmbed, getDirectImageUrl, getVideoEmbed, parseCode, parseTopic, errorMessages } from "../Helpers/index.jsx";
 
 
 export const ClassRoom = () => {
@@ -183,7 +27,7 @@ export const ClassRoom = () => {
   const [submitError, setSubmitError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [ shuffle, setShuffle ] = useState(false); 
-  const storedQNoArr = localStorage.getItem('qNoArr')
+  const storedQNoArr = localStorage.getItem(`qNoArr${topicName}`)
   const [ qNoArr, setQNoArr ] = useState(storedQNoArr ? JSON.parse(storedQNoArr) : []);  
   const bookmark = localStorage.getItem(`${qNoArr[counter]}${topicName}`) || null;
   const chosenOption = bookmark? JSON.parse(bookmark).chosenOption : null; 
@@ -230,7 +74,7 @@ const fisherYates = (array) => {
           if(qNoArr.length === 0){
             const randomizedArr = randomized.map((docSnap) => docSnap.id)
             setQNoArr(randomizedArr)
-            localStorage.setItem('qNoArr', JSON.stringify(randomizedArr))            
+            localStorage.setItem(`qNoArr${topicName}`, JSON.stringify(randomizedArr))            
           } else {
             randomized = qNoArr.map((qNo, index) => randomized.find((docSnap) => docSnap.id === qNo))
                         
@@ -241,7 +85,7 @@ const fisherYates = (array) => {
           if(qNoArr.length === 0) {
             const sequentialArr = sequential.map((docSnap) => docSnap.id)
             setQNoArr(sequentialArr)
-            localStorage.setItem('qNoArr', JSON.stringify(sequentialArr))          
+            localStorage.setItem(`qNoArr${topicName}`, JSON.stringify(sequentialArr))          
           } else {
             sequential = qNoArr.map((qNo, index) => sequential.find((docSnap) => docSnap.id === qNo))
             
@@ -521,24 +365,44 @@ const fisherYates = (array) => {
               />
             )}
 
-            {responseInfo.responseType === "video" && (
-            <iframe
-              width="100%"
-              height="100%"
-              src={getYouTubeEmbedUrl(responseInfo.responsePayload, { autoplay: true, controls: false})}
-              title="YouTube video player"
-              frameBorder="0"
-              >
-            </iframe>
-            )}
+            {responseInfo.responseType === "video" && (() => {
+              const video = getVideoEmbed(responseInfo.responsePayload);
+              if (!video) return null;
 
-            {responseInfo.responseType === "audio" && (
-              <audio
-                className="q-media"
-                src={getDirectAudioUrl(responseInfo.responsePayload)}
-                controls
-              />
-            )}
+              return video.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="400"
+                  src={video.url}
+                  title="Video player"
+                  frameBorder="0"
+                />
+              ) : (
+                <video
+                  width="100%"
+                  height="100%"
+                  src={video.url}
+                  controls
+                />
+              );
+            })()}    
+
+            {responseInfo.responseType === "audio" && (() => {
+              const audio = getAudioEmbed(responseInfo.responsePayload);
+              if (!audio) return null;
+
+              return audio.type === "iframe" ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={audio.url}
+                  title="Audio player"
+                  frameBorder="0"
+                />
+              ) : (
+                <audio src={audio.url} controls />
+              );
+            })()}
           </div>
         </div>
       )}

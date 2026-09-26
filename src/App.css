@@ -186,6 +186,19 @@ textarea, .textInput {
     color: var(--text-color);
   }  
 
+
+   .modal-content-media {
+    background-color: var(--card-color);
+    padding: 20px;
+    border-radius: 10px;
+    max-height: fit-content;
+    max-width: fit-content; 
+    min-width: 350px;
+    box-shadow: 0 10px 20px rgba(0,0,0,.2);
+    position: relative; 
+    color: var(--text-color);
+  }  
+ 
   .modal {
     padding: 15px; 
     inset: 0; 
@@ -366,6 +379,19 @@ textarea, .textInput {
     box-shadow: 0 10px 20px rgba(0,0,0,.2);
     position: relative; 
     color: var(--text-color)
+  }
+
+
+    .modal-content-media {
+    background-color: var(--card-color);
+    padding: 20px;
+    border-radius: 10px;
+    max-height: fit-content; 
+    min-width: 300px;
+    max-width: fit-content; 
+    box-shadow: 0 10px 20px rgba(0,0,0,.2);
+    position: relative; 
+    color: var(--text-color); 
   }
 
   /*redundant*/
@@ -746,8 +772,6 @@ ul {
 .action:disabled {
   color: grey; 
 }
-
-
 
 
 .error-message {

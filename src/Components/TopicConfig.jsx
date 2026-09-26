@@ -9,49 +9,16 @@ import { configureTopic } from "../store/topicConfigSlice";
 import { createPortal } from "react-dom";
 import { AuthContext, useAuth } from "../store/authProvider";
 import { RevolvingDot } from "react-loader-spinner";
-import { useNameChange, parseName, useTopicChange, parseTopic, parseCode } from "../Hooks";
- 
+import { useNameChange } from "../Hooks";
+import { errorMessages, parseName } from "../Helpers/index.jsx";
 
-const errorMessages = {
-  "auth/user-not-found":
-    "No account exists with that email address.",
 
-  "auth/wrong-password":
-    "The password you entered is incorrect.",
-
-  "auth/invalid-email":
-    "Please enter a valid email address.",
-
-  "auth/email-already-in-use":
-    "An account with this email already exists.",
-
-  "auth/weak-password":
-    "Your password is too weak. Try using at least 6 characters.",
-
-  "auth/network-request-failed":
-    "It looks like you're offline. Please check your internet connection and try again.",
-
-  "auth/too-many-requests":
-    "Too many attempts detected. Please wait a few minutes and try again.",
-
-  "permission-denied":
-    "You don't have permission to perform this action.",
-
-  "not-found":
-    "The requested information could not be found.",
-
-  "unavailable":
-    "Our servers are temporarily unavailable. Please try again later.",
-
-  "deadline-exceeded":
-    "The request took too long to complete. Please try again."
-};
 
 // you can have tutordashboard fetch students and simply pass them to topic config, eliminating the need to 
 // fetch data at all. 
 
 
-export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuestion, addStudent, editing, deletingQuestion }) => {
+export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuestion, addStudent, editing, deletingQuestion, addingTopic }) => {
   const changedNames = useNameChange(); 
 
 

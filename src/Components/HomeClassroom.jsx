@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Notif } from "./Notif";
-import { parseCode } from "../Hooks";
+import { parseCode } from "../Helpers";
 
 const DEMO_KEY_PREFIX = "demoClassroom";
 const TOPIC_NAME = "Voltage"; // hardcode your topic display name here
