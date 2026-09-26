@@ -87,12 +87,14 @@ export const Submissions = () => {
 
   return (
     <div className="center_piece">
-      <h2 className="header-centered">
-        {parseCode(parseTopic(topicName, changedTopics))} Submissions for {parseName(studentName, studentId, changedNames)}
-      </h2>
-      <h3 className="header-centered">
-        Submitted at {submittedAt}
+      <h2 className="display-header centered">Submissions</h2>
+      <h3 style={{color: 'darkorange'}} className="display-header header-centered">
+        {parseCode(parseTopic(topicName, changedTopics))}  
       </h3>
+      <h3 style={{color: 'darkorange'}} className="display-header centered">{parseName(studentName, studentId, changedNames)}</h3>
+      <small className="display-header header-centered">
+        Submitted at {submittedAt}
+      </small>
 
       {subSnap.docs.map((docSnap) => {
         const questionNumber = docSnap.id;

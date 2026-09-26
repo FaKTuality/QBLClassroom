@@ -116,9 +116,9 @@ export const TopicMembers = () => {
   return(
     <div className="center_piece">
       <div style={{display: "flex", flexDirection: 'column', gap: "1px"}}>
-        <h3 className="centered">Students with access to </h3>
-        <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicName, changedTopics))}</h3>
-        <small className="centered" style={{color: 'orange'}}>flip the switch to shuffle questions</small>
+        <h2 className="display-header centered">Students with access to </h2>
+        <h3 className="display-header centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicName, changedTopics))}</h3>
+        <small className="display-header centered" style={{color: 'orange'}}>flip the switch to shuffle questions</small>
       </div>
         {students?.map((student, studentIndex) => 
         <div key={student.studentId} className="listItemTopicMembers relative" onClick={randomClick}>

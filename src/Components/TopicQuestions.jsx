@@ -226,13 +226,13 @@ export const TopicQuestions = ( )=> {
     <>
       <div className="center_piece">
       <div style={{display: "flex", flexDirection: 'column', gap: "0px"}}>
-        {!tutorView && <h3 className="centered">Questions for <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h3> }
-        { tutorView && <h3 className="centered">Questions under <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h3>}
-        <h3 className="centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicInfo.topicName, changedTopics))}</h3>
-        {!tutorView && ClassRoomStatus?.inClass && <h4 style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</h4>}
-        {!tutorView && !ClassRoomStatus?.inClass && <h4 style={{color: 'red'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</h4>}
-        {!tutorView && !ClassRoomStatus?.inClass && ClassRoomStatus?.inSession && <h4 style={{color: 'green'}} className="centered">In session</h4>}
-        {tutorView && <h4 style={{color: 'darkorange'}} className="centered">New students receive these questions</h4>}
+        {!tutorView && <h2 className="display-header centered">Questions for <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h2> }
+        { tutorView && <h2 className="display-header centered">Questions under <span className="centered" style={{color: "darkorange"}}>{parseName(topicInfo.name, topicInfo.studentId , changedNames)}</span></h2>}
+        <h3 className="display-header centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicInfo.topicName, changedTopics))}</h3>
+        {!tutorView && ClassRoomStatus?.inClass && <small style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</small>}
+        {!tutorView && !ClassRoomStatus?.inClass && <small style={{color: 'red'}} className="display-header centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</small>}
+        {!tutorView && !ClassRoomStatus?.inClass && ClassRoomStatus?.inSession && <small style={{color: 'green'}} className="centered">In session</small>}
+        {tutorView && <small style={{color: 'darkorange'}} className="display-header centered">New students receive these questions</small>}
       </div>        
         
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}     

@@ -1694,3 +1694,7 @@ input:-webkit-autofill:active {
   right: 2px; 
   z-index: 999; 
 }
+
+.display-header {
+  margin: 0 auto; 
+}

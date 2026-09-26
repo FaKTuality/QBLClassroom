@@ -274,9 +274,9 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
       {
       <div>
         <div className="q-number">{questionNumber ? `question ${parseInt(questionNumber?.slice(8), 10)}` : `question ${bookmark}`}</div>
-        <h2 className="header-centered">{parseCode(parseTopic(topicName, changedTopics))}</h2>
+        <h2 className="header-centered" style={{color: 'darkorange'}}>{parseCode(parseTopic(topicName, changedTopics))}</h2>
         {name && 
-        <h3 className="header-centered">
+        <h3 className="header-centered" style={{color: 'darkorange'}}>
           Editing for {parseName(name, studentId, changedNames)[0].toUpperCase() + parseName(name, studentId, changedNames).slice(1)}
         
         </h3>}
@@ -442,12 +442,17 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
     
     <small className="listItem">
       
-      <ul>
+      <ul className="supported-links">
         <h4>Supported links:</h4>
-        <li><strong>Video:</strong> YouTube — copy the link from the Share button.</li>
-        <li><strong>Audio:</strong> Google Drive, Dropbox, or Vocaroo — copy the shareable link from each site.</li>
-        <li><strong>Image:</strong> Giphy, Imgur, or Google Drive — copy the page URL. For most other sites like Tenor, 
-        right-click the image itself and choose "Copy image address" instead of copying the page URL.</li>
+        <li>
+          <strong>Video:</strong> YouTube (copy the link from the Share button), Google Drive, Dropbox, or Giphy Clips.
+        </li>
+        <li>
+          <strong>Audio:</strong> Google Drive, Dropbox, or Vocaroo. Copy the shareable link from each site.
+        </li>
+        <li>
+          <strong>Image:</strong> Google Drive, Dropbox, or Giphy. Copy the shareable or page link from each site.
+        </li>
       </ul>
     </small>    
     </div>
