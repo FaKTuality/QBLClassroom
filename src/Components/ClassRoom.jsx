@@ -103,10 +103,16 @@ const getDirectImageUrl = (url) => {
     return `https://i.giphy.com/media/${giphyMatch[1]}/giphy.gif`;
   }
 
-  const imgurRegex = /^https?:\/\/imgur\.com\/([a-zA-Z0-9]+)(?:\..+)?$/i;
+  const imgurRegex = /^https?:\/\/(?:www\.)?imgur\.com\/(?:gallery|a)\/(?:[a-zA-Z0-9-]*-)?([a-zA-Z0-9]{5,7})$/i;
   const imgurMatch = trimmedUrl.match(imgurRegex);
   if (imgurMatch && imgurMatch[1]) {
     return `https://i.imgur.com/${imgurMatch[1]}.png`;
+  }
+
+  const imgurDirectRegex = /^https?:\/\/(?:www\.)?imgur\.com\/([a-zA-Z0-9]{5,7})(?:\.(?:jpe?g|png|gif|webp))?\/?$/i;
+  const imgurDirectMatch = trimmedUrl.match(imgurDirectRegex);
+  if (imgurDirectMatch && imgurDirectMatch[1]) {
+    return `https://i.imgur.com/${imgurDirectMatch[1]}.png`;
   }
 
   const gDriveRegex = /^https?:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i;
