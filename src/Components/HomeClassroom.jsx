@@ -202,6 +202,13 @@ export const DemoClassRoom = () => {
   };
 
   const handleSubmit = () => {
+    const storedItem = localStorage.getItem(`${DEMO_KEY_PREFIX}-${question.id}-${TOPIC_NAME}`);
+
+    if (storedItem === null) {
+      alert("select an option first");
+      return;
+    }
+
     setSubmitting(true);
 
     clearDemoStorage(questions);

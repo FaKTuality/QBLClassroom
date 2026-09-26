@@ -170,7 +170,7 @@ const fisherYates = (array) => {
   };
 
   const handleSubmit = async () => {
-    const storedItem = localStorage.getItem(`${questionNumber}${topicName}`)
+    const storedItem = localStorage.getItem(`${docSnap.id}${topicName}`)
     
     if(storedItem === null) {
       alert("select an option first")
