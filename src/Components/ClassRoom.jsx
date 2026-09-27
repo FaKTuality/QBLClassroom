@@ -40,7 +40,7 @@ export const ClassRoom = () => {
   const changedTopics = useTopicChange(); 
   const [ givingUp, setGivingUp ] = useState(false); 
   const [lastSelectionTime, setLastSelectionTime] = useState(0);
-  const SELECTION_COOLDOWN = 80000;
+  const SELECTION_COOLDOWN = 8000;
 
 
 const fisherYates = (array) => {
@@ -215,7 +215,7 @@ const fisherYates = (array) => {
     await setDoc(docRef,{ inClass: false, inSession: false}, { merge: true });    
     localStorage.removeItem(`LQN${topicName}`)
     localStorage.removeItem('qNoArr')     
-
+      setNotifOperation("submit-answers");
       setShowNotif(true);
       setTimeout(() => {
         navigate("/navstu/viewtopicsstudent", { state: { userId: studentId, studentName, }});        
@@ -311,16 +311,14 @@ const fisherYates = (array) => {
 
               return video.type === "iframe" ? (
                 <iframe
-                  width="100%"
-                  height="400"
+                  className="media-iframe-video"
                   src={video.url}
                   title="Video player"
                   frameBorder="0"
                 />
               ) : (
                 <video
-                  width="100%"
-                  height="100%"
+                  className="media-video"
                   src={video.url}
                   controls
                 />
@@ -342,14 +340,13 @@ const fisherYates = (array) => {
 
               return audio.type === "iframe" ? (
                 <iframe
-                  width="100%"
-                  height="100%"
+                  className="media-iframe-audio"
                   src={audio.url}
                   title="Audio player"
                   frameBorder="0"
                 />
               ) : (
-                <audio src={audio.url} controls />
+                <audio className="media-audio" src={audio.url} controls />
               );
             })()}
 
@@ -382,7 +379,7 @@ const fisherYates = (array) => {
       {showModal && responseInfo && (
         <div className="modal" onClick={closeModal}>
           <div
-            className="modal-content"
+            className={responseInfo.responseType === "text" ? 'modal-content':"modal-content-media"}
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -405,16 +402,14 @@ const fisherYates = (array) => {
 
               return video.type === "iframe" ? (
                 <iframe
-                  width="100%"
-                  height="400"
+                  className="media-iframe-video"
                   src={video.url}
                   title="Video player"
                   frameBorder="0"
                 />
               ) : (
                 <video
-                  width="100%"
-                  height="100%"
+                  className="media-video"
                   src={video.url}
                   controls
                 />
@@ -427,14 +422,13 @@ const fisherYates = (array) => {
 
               return audio.type === "iframe" ? (
                 <iframe
-                  width="100%"
-                  height="100%"
+                  className="media-iframe-audio"
                   src={audio.url}
                   title="Audio player"
                   frameBorder="0"
                 />
               ) : (
-                <audio src={audio.url} controls />
+                <audio className="media-audio" src={audio.url} controls />
               );
             })()}
           </div>

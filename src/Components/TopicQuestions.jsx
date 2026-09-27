@@ -232,7 +232,7 @@ export const TopicQuestions = ( )=> {
         {!tutorView && ClassRoomStatus?.inClass && <small style={{color: 'green'}} className="centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is in class</small>}
         {!tutorView && !ClassRoomStatus?.inClass && <small style={{color: 'red'}} className="display-header centered">{parseName(topicInfo.name, topicInfo.studentId , changedNames)} is not in class</small>}
         {!tutorView && !ClassRoomStatus?.inClass && ClassRoomStatus?.inSession && <small style={{color: 'green'}} className="centered">In session</small>}
-        {tutorView && <small style={{color: 'darkorange'}} className="display-header centered">New students receive these questions</small>}
+        {tutorView && <small style={{color: 'darkorange'}} className="display-header centered">Added students receive these questions</small>}
       </div>        
         
         {showNotif && <Notif operation={"delete"} setShowNotif={setShowNotif}/>}     
@@ -257,22 +257,47 @@ export const TopicQuestions = ( )=> {
                   }}
                 >⋮</div>
                 <div className="q-number">{ `question ${index + 1}` }</div>
-                { additionalMediaType === 'video' && 
-                  <video 
-                    className="q-media" 
-                    src={additionalMediaLink} controls/>
-                }
+            {additionalMediaType === "video" && (() => {
+              const video = getVideoEmbed(additionalMediaLink);
+              if (!video) return null;
+
+              return video.type === "iframe" ? (
+                <iframe
+                  className="media-iframe-video"
+                  src={video.url}
+                  title="Video player"
+                  frameBorder="0"
+                />
+              ) : (
+                <video
+                  className="media-video"
+                  src={video.url}
+                  controls
+                />
+              );
+            })()} 
 
                 { additionalMediaType === "image" && 
                   <img 
                     className="q-media centered" 
                     src={additionalMediaLink} />}
 
-                { additionalMediaType === "audio" && 
-                  <audio 
-                    className="q-media"
-                    src={additionalMediaLink} 
-                    controls/>}
+            {additionalMediaType === "audio" && (() => {
+              const audio = getAudioEmbed(additionalMediaLink);
+              if (!audio) return null;
+
+              return audio.type === "iframe" ? (
+                <iframe
+                  className="media-iframe-audio"
+                  src={audio.url}
+                  title="Audio player"
+                  frameBorder="0"
+                />
+              ) : (
+                <audio className="media-audio" src={audio.url} controls />
+              );
+            })()}
+
                 <div className="q-text">{parseCode(docSnap.data().questionText)}</div>
                 <ul className="list">
                   { docSnap.data().options.map((option) => { 
@@ -300,7 +325,7 @@ export const TopicQuestions = ( )=> {
       {showMedia && responseInfo && (
         <div className="modal" onClick={() => setShowMedia(false)}>
           <div
-            className="modal-content-media"
+            className={responseInfo.responseType === "text" ? 'modal-content':"modal-content-media"}
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -322,16 +347,14 @@ export const TopicQuestions = ( )=> {
 
               return video.type === "iframe" ? (
                 <iframe
-                  width="100%"
-                  height="400"
+                  className="media-iframe-video"
                   src={video.url}
                   title="Video player"
                   frameBorder="0"
                 />
               ) : (
                 <video
-                  width="100%"
-                  height="100%"
+                  className="media-video"
                   src={video.url}
                   controls
                 />
@@ -344,14 +367,13 @@ export const TopicQuestions = ( )=> {
 
               return audio.type === "iframe" ? (
                 <iframe
-                  width="100%"
-                  height="100%"
+                  className="media-iframe-audio"
                   src={audio.url}
                   title="Audio player"
                   frameBorder="0"
                 />
               ) : (
-                <audio src={audio.url} controls />
+                <audio className="media-audio" src={audio.url} controls />
               );
             })()}
           </div>

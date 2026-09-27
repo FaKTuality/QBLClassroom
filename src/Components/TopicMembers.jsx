@@ -116,11 +116,15 @@ export const TopicMembers = () => {
   return(
     <div className="center_piece">
       <div style={{display: "flex", flexDirection: 'column', gap: "1px"}}>
-        <h2 className="display-header centered">Students with access to </h2>
+        <h2 className="display-header centered">Students With Access To </h2>
         <h3 className="display-header centered" style={{color: "darkorange"}}>{parseCode(parseTopic(topicName, changedTopics))}</h3>
         <small className="display-header centered" style={{color: 'orange'}}>flip the switch to shuffle questions</small>
       </div>
-        {students?.map((student, studentIndex) => 
+        {students.length === 0 ? 
+        <p className="centered">No students have been assigned this topic.</p>
+      
+      
+      :students?.map((student, studentIndex) => 
         <div key={student.studentId} className="listItemTopicMembers relative" onClick={randomClick}>
         <div className="three-dots for-mobile"
           onClick={(e) => {
