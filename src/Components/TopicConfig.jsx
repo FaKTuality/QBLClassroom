@@ -159,7 +159,8 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
     const deleteQuestion = async (student) => {
       const docRef = doc(db, `users/${student.studentId}/topics/${values.topicName}/questions/${questionNumber}`); 
       const docRef2 = doc(db, `admin/${tutorId}/topics/${values.topicName}`)
-      const allPromises = Promise.all([deleteDoc(docRef), getDoc(docRef2)])
+      const docRef3 = doc(db, "users", student.studentId, "classRoomState", topicName,);
+      const allPromises = Promise.all([deleteDoc(docRef), getDoc(docRef2), deleteDoc(docRef3)])
       const result = await allPromises;
       const { students } = result[1].data();
       const updatedStudents = students.map((student)=>{
