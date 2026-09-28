@@ -12,7 +12,7 @@ import { changeTopic } from "../store/topicConfigSlice";
 import GoogleAds from "./AdComponent.jsx";
 import { useSelector } from "react-redux";
 import { errorMessages, parseTopic, parseCode, } from "../Helpers/index.jsx";
-
+import { FaPlus } from "react-icons/fa";
 
 
 
@@ -310,28 +310,28 @@ export const ViewTopics = () => {
         >⋮</div>
         <div className={showOptions.id === topic.id && showOptions.show ? 'action-group' : 'buttonPair'}>
 
-          {!tutorView && <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} onClick={() => handleViewStudents(topic.data())}>students</div>}
+          {!tutorView && <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} onClick={() => handleViewStudents(topic.data())}>Students</div>}
           
           <div 
             className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
             onClick={tutorView ? () => handleAddQuestionTV(topic.data()) : () => handleAddQuestion(topic.data())}>
-              + question
+              <FaPlus size={10} color="orange"/> &nbsp; Question
             </div>
            {tutorView && <div 
               className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
               onClick={() => handleAddStudent(topic.data())}>
-                + student
+                <FaPlus size={10} color="orange"/> &nbsp; Student
             </div>}
 
            {tutorView && <div 
               className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
               onClick={() => handleViewQuestions(topic.data())}>
-                View Questions 
+                Open 
             </div>}            
           {tutorView && <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} 
           onClick={() => handleShowModal2(topic.id)}>Rename</div>}            
             <div className={`${showOptions.id === topic.id && showOptions.show ? 'action' : 'button'}`} style={{color: 'red'}} 
-            onClick={tutorView ? () => confirmDelete(topic.data()) : () => handleDeleteTopic(topic.data()) }>delete</div>
+            onClick={tutorView ? () => confirmDelete(topic.data()) : () => handleDeleteTopic(topic.data()) }>Delete</div>
         </div>
       </div> 
       )}

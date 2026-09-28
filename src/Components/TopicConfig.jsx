@@ -134,7 +134,7 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
 
   const onSubmit = async (values) => {
     if(!defaultTopicConfig){
-      console.log("I dispatch configureTopic")
+      
       await dispatch(configureTopic({tutorId, topicConfig: values}))
     } else {
         const selectedStudents = values.students.filter((student) => student.included)
@@ -334,7 +334,11 @@ export const TopicConfig = ({ setShowModal, setShowNotif, deleteTopic, addQuesti
               className="error-message"
               />
               {deleteTopic && <h5 className="centered">Select students to delete this topic for</h5>}
-              {editing  && <h5 className="centered">Select students to edit this question for</h5>}
+              {editing  && 
+              <div className="flex-vert">
+                <h5 className="centered display-header">Select students to edit this question for</h5>
+                <h5 className="centered display-header">These students have this topic and are not in session.</h5>
+              </div> }
               {addQuestion && <h5 className="centered">Select students to add questions for</h5>}
               { deletingQuestion && <h5 className="centered">{`Select students to delete this question for`}</h5>}
               { addStudent && <h5 className="centered">{`Select students to add to this topic`}</h5>}

@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { useSelector } from "react-redux";
 import { FieldArray } from "formik";
 import { ErrorMessage } from "formik";
-import { setDoc, doc, getDocs, collection, serverTimestamp, updateDoc, increment, getDoc, query, orderBy } from "firebase/firestore";
+import { setDoc, doc, getDocs, collection, serverTimestamp, updateDoc, increment, getDoc, query, orderBy, runTransaction } from "firebase/firestore";
 import { db } from "../../Firebase/index.js";
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
@@ -29,6 +29,14 @@ const DraftAutosave = () => {
   return null;
 };
 
+
+
+class InSessionError extends Error {
+  constructor(names) {
+    super(`${names.join(", ")} ${names.length > 1 ? "are" : "is"} now in session`);
+    this.name = "InSessionError";
+  }
+}
 
 
 export const QuestionForm = () => {
@@ -157,20 +165,30 @@ const resolveGiphyVideoUrl = async (url) => {
     );
     const finalValues = { ...newValues, options: resolvedOptions };
 
-    const saveQuestion = async (student, index, questionNumber) => { 
-      let docRef; 
-      if(topicConfig?.isEditing){
-        docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/${questionNumber}`)
-      } else {
-        console.log("THIS IS QUESTIONNuMbEr", questionNumber); 
-        docRef = doc(db, `users/${student.studentId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`)
-      } 
-      return Promise.all([
-        setDoc(docRef, finalValues), 
-        !topicConfig.isEditing && setDoc(doc(db, `admin/${tutorId}/topics/${topicName}/questions/question${String(bookmark).padStart(4, "0")}`), finalValues), 
-        setDoc(doc(db, `users/${student.studentId}/topics/${topicName}`),{ createdAt: serverTimestamp()})
-      ]) ; 
-    }
+    const saveQuestion = async (student, index, questionNumber) => {
+      const isEditing = topicConfig?.isEditing;
+      const questionId = isEditing
+        ? questionNumber
+        : `question${String(bookmark).padStart(4, "0")}`;
+
+      const stateRef = doc(db, "users", student.studentId, "classRoomState", topicName);
+      const topicRef = doc(db, "users", student.studentId, "topics", topicName);
+      const questionRef = doc(db, "users", student.studentId, "topics", topicName, "questions", questionId);
+
+      return runTransaction(db, async (tx) => {
+        // reads first
+        const topicSnap = await tx.get(topicRef);
+        const stateSnap = isEditing ? await tx.get(stateRef) : null;
+
+        if (stateSnap?.data()?.inSession) {
+          throw new InSessionError([student.studentName]);
+        }
+
+        // writes
+        tx.set(questionRef, finalValues);
+        if (!topicSnap.exists()) tx.set(topicRef, { createdAt: serverTimestamp() });
+      });
+    };
    
     const studentPromises = students.map((student, index)=> saveQuestion(student,index, questionNumber))
     
@@ -208,10 +226,13 @@ const resolveGiphyVideoUrl = async (url) => {
         setLoading(true); 
       }        
     } catch(e){
-      
-      setStatus(!navigator.onLine
-      ? "You're currently offline. Please reconnect to the internet and try again."
-      : errorMessages[e.code] ?? "Something went wrong. Please try again.")
+      setStatus(
+        e instanceof InSessionError
+          ? e.message
+          : !navigator.onLine
+          ? "You're currently offline. Please reconnect to the internet and try again."
+          : errorMessages[e.code] ?? "Something went wrong. Please try again."
+      );
     } finally {
       console.log("goes into finally too")
       setSubmitting(false); 
@@ -432,7 +453,7 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
               disabled={isSubmitting}
             >{isSubmitting? "saving question..." : "save question"}</button>
           </div>
-          { status && <div className="error-message">{status}</div>}
+          { status && <div className="flex-hori"><div className="error-message centered">{status}</div></div>}
                  
    
 

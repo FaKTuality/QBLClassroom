@@ -48,20 +48,39 @@ export const TopicQuestions = ( )=> {
   const changedNames = useNameChange(); 
   const changedTopics = useTopicChange(); 
   const [ ClassRoomStatus, setClassStatus ] = useState(null); 
+  const [ students, setStudents ] = useState(topicInfo.students)
   
   
   useEffect(() => {
-    
+    var unsubscribers = []
     if(!tutorView) {
-      const docRef = doc(db, "users", topicInfo.studentId, "classRoomState", topicInfo.topicName);
-      var unsubscribe = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setClassStatus({
-            inClass: docSnap.data()?.inClass, 
-            inSession: docSnap.data()?.inSession, 
+       unsubscribers = topicInfo.students.map((studentA) => {
+        const docRef = doc(db, "users", studentA.studentId, "classRoomState", topicInfo.topicName);
+        if(studentA.studentId === topicInfo.studentId){
+          var unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+              setClassStatus({
+                inClass: docSnap.data()?.inClass, 
+                inSession: docSnap.data()?.inSession, 
+              })
+            }            
           })
+        } else {
+          
+          var unsubscribe = onSnapshot(docRef, (docSnap) =>{
+            if(docSnap.exists()) {
+              if(docSnap.data().inSession) {
+                setStudents(prev => prev.filter((student) => student.studentId !== studentA.studentId ))
+              } else {
+                setStudents(prev =>
+                  prev.some(s => s.studentId === studentA.studentId) ? prev : [...prev, studentA])
+              }
+            }
+          } )
         }
-      });        
+
+        return unsubscribe
+      })      
     }
   
     const fetchQuestions = async () => {
@@ -100,7 +119,7 @@ export const TopicQuestions = ( )=> {
     }
 
     tutorView? fetchQuestionsTV() : fetchQuestions(); 
-    return unsubscribe; 
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe()); 
   }, [topicInfo.studentId, topicInfo.topicName, showModal, showNotif])
 
   if(loading) {
@@ -125,12 +144,12 @@ export const TopicQuestions = ( )=> {
     if(!ClassRoomStatus?.inSession) {
       const topicConfigSerial = JSON.stringify({ 
         topicName: topicInfo.topicName,
-        students: topicInfo.students, 
+        students: students, 
         studentId: topicInfo.studentId,
         name: topicInfo.name, 
         isEditing: true,
       })
-      console.log(topicInfo.students)
+      
       localStorage.setItem("topicConfig", topicConfigSerial);
       const questionInfoSerial = JSON.stringify(questionInfo); 
       localStorage.setItem('questionInfo', questionInfoSerial);
@@ -145,7 +164,7 @@ export const TopicQuestions = ( )=> {
     if(!ClassRoomStatus?.inSession) {
       const topicConfigSerial = JSON.stringify({ 
         topicName: topicInfo.topicName,
-        students: topicInfo.students,
+        students: students,
         isDeleting: true,
       })
       localStorage.setItem("topicConfig", topicConfigSerial);    
