@@ -212,7 +212,7 @@ export const DemoClassRoom = () => {
     setSubmitting(true);
 
     clearDemoStorage(questions);
-
+    setNotifOperation("submit-answers");
     setShowNotif(true);
     setTimeout(() => {
       setSubmitting(false);
