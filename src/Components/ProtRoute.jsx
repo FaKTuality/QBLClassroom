@@ -31,7 +31,7 @@ const errorMessages = {
     "Too many attempts detected. Please wait a few minutes and try again.",
 
   "permission-denied":
-    "You don't have permission to perform this action.",
+    "You don't have permission to perform this action protRoutes.",
 
   "not-found":
     "The requested information could not be found.",
@@ -89,9 +89,8 @@ export const ProtRoutes = (Component) => () => {
 
     if(!user || !auth.currentUser?.emailVerified) {
       navigate('/navauth/signin')
-      return; 
     }
-    
+
     if(auth.currentUser?.emailVerified){
       console.log("I'm fetching user")
       fetchUser()      
