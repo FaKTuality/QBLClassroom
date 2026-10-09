@@ -32,8 +32,8 @@ const DraftAutosave = () => {
 export const QuestionFormTV = () => {
   const { currentUser: user, loading: authLoading} = useAuth()
   const location = useLocation();
-  const [ questionState ] = useState(location.state); 
-  const { topicName, questionData, questionNumber, isEditing } = questionState; 
+  const [ questionState ] = useState(location.state);
+  const { topicName, questionData, questionNumber, isEditing } = questionState ?? JSON.parse(localStorage.getItem('questState')); 
   const [ showNotif, setShowNotif ] = useState(false); 
   const [ showNotif2, setShowNotif2 ] = useState(false); 
   const [ loading, setLoading ] = useState(true); 
@@ -43,7 +43,9 @@ export const QuestionFormTV = () => {
   const navigate = useNavigate(); 
   const changedTopics = useTopicChange(); 
   const changedNames = useNameChange(); 
-
+  if (location.state) {
+    localStorage.setItem('questState', JSON.stringify(location.state));
+  }
   
 
 useEffect(() => {
