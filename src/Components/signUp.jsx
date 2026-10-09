@@ -269,11 +269,13 @@ const handleProviderSignUp = async (provider) => {
         // Check whether this account already has a tutor profile.
         const tutorDoc = await getDoc(doc(db, "admin", user.uid));
 
-        if (studentDoc.exists() || tutorDoc.exists()) {
-            alert("This account already exists. Please sign in instead.");
-            await auth.signOut();
-            navigate("/navauth/signin");
-            return;
+        if(tutorDoc.exists()){
+          navigate("/navtut/tutordashboard");
+          return; 
+        }
+        if(studentDoc.exists()){
+          navigate("/navstu/studentdashboard");
+          return
         }
 
         if (inviteDoc) {
