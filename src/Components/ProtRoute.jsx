@@ -88,15 +88,10 @@ export const ProtRoutes = (Component) => () => {
     }
 
     if(!user || !auth.currentUser?.emailVerified) {
-      if(!user){
-        console.log('i am protroutes and i am re-routing you back to sign in because user is', user)
-      } else {
-        console.log('i am protroutes and i am re-routing you back to sign in because you are not email verified')
-      }
-      
       navigate('/navauth/signin')
-      
+      return; 
     }
+    
     if(auth.currentUser?.emailVerified){
       console.log("I'm fetching user")
       fetchUser()      
