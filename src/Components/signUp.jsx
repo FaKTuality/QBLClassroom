@@ -272,6 +272,7 @@ const handleProviderSignUp = async (provider) => {
         if (studentDoc.exists() || tutorDoc.exists()) {
             alert("This account already exists. Please sign in instead.");
             await auth.signOut();
+            navigate("/navauth/signin");
             return;
         }
 
