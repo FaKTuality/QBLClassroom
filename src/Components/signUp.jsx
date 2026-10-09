@@ -257,23 +257,33 @@ const startTimer = () => {
 
 
 
-  const handleProviderSignUp = async (provider) => {
+const handleProviderSignUp = async (provider) => {
     try {
-      const credential = await signInWithPopup(auth, provider);
+        const credential = await signInWithPopup(auth, provider);
+        const user = credential.user;
+        const name = user.displayName || "User";
 
-      const user = credential.user;
+        // Check whether this account already has a student profile.
+        const studentDoc = await getDoc(doc(db, "users", user.uid));
 
-      const name = user.displayName || "User";
+        // Check whether this account already has a tutor profile.
+        const tutorDoc = await getDoc(doc(db, "admin", user.uid));
 
-      if (inviteDoc) {
-        await createStudent(user, name);
-      } else {
-        await createTutor(user, name);
-      }
+        if (studentDoc.exists() || tutorDoc.exists()) {
+            alert("This account already exists. Please sign in instead.");
+            await auth.signOut();
+            return;
+        }
+
+        if (inviteDoc) {
+            await createStudent(user, name);
+        } else {
+            await createTutor(user, name);
+        }
     } catch (error) {
-      alert(error.message);
+        alert(error.message);
     }
-  };
+};
 
 useEffect(()=> {
   if(refresh){
