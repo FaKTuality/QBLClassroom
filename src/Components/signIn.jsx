@@ -153,7 +153,7 @@ const createTutor = async (user, name) => {
         startTimer();       
         }
     } catch (e) {
-      console.log(e)
+      console.log("i'm", e)
       setStatus(  !navigator.onLine
       ? "You're currently offline. Please reconnect to the internet and try again."
       : errorMessages[e.code] ?? "Something went wrong. Please try again.");
