@@ -1,7 +1,8 @@
 // Put this next to Notif.jsx / ClassRoom.jsx.
 // A simple analog-style countdown: an orange ring that drains, a hand that sweeps
 // clockwise from 12 o'clock, tick marks, and the seconds left in the middle.
-// Pinned to the top-left of the viewport so students don't have to scroll to see it.
+// Pinned to the top-left of the viewport so students don't have to scroll to see it,
+// on its own white card so it stays readable over any page content (including mobile).
 
 const CENTER = 50;
 const RADIUS = 44;
@@ -28,6 +29,10 @@ export const PenaltyClock = ({ remainingMs, totalSeconds }) => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        padding: "6px 10px 8px",
+        backgroundColor: "#ffffff",
+        borderRadius: "14px",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.25)",
         color: "darkorange",
       }}
     >
@@ -92,7 +97,7 @@ export const PenaltyClock = ({ remainingMs, totalSeconds }) => {
           {secondsLeft}
         </text>
       </svg>
-      <small>Try again in {secondsLeft}s</small>
+      <small style={{ color: "#444" }}>Try again in {secondsLeft}s</small>
     </div>
   );
 };
