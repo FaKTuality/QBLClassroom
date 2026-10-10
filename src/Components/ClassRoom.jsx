@@ -4,10 +4,11 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../Firebase/index.js";
 import { useAuth } from "../store/authProvider";
 import { Notif } from "./Notif";
+import { PenaltyClock } from "./PenaltyClock";
 import { RevolvingDot } from "react-loader-spinner";
-import { useTopicChange } from "../Hooks";
+import { useTopicChange, usePenaltyLock } from "../Hooks";
 import { FaDoorOpen } from "react-icons/fa";
-import { getAudioEmbed, getDirectImageUrl, getVideoEmbed, parseCode, parseTopic, errorMessages } from "../Helpers/index.jsx";
+import { getAudioEmbed, getDirectImageUrl, getVideoEmbed, parseCode, parseTopic, errorMessages, getPenaltySeconds, isWrongChoice } from "../Helpers/index.jsx";
 
 
 export const ClassRoom = () => {
@@ -39,8 +40,8 @@ export const ClassRoom = () => {
   const finalQuestion = counter === lastIndex;
   const changedTopics = useTopicChange(); 
   const [ givingUp, setGivingUp ] = useState(false); 
-  const [lastSelectionTime, setLastSelectionTime] = useState(0);
-  const SELECTION_COOLDOWN = 8000;
+  // Per-question wrong-answer locks (replaces the old global selection cooldown).
+  const { startLock, remainingMs, clearLocks } = usePenaltyLock(`penaltyLocks${topicName}`);
 
 
 const fisherYates = (array) => {
@@ -137,13 +138,14 @@ const fisherYates = (array) => {
   const closeModal = () => setShowModal(false);
 
   const handleClick = (question, option, questionNumber) => {
-    if (option.text !== chosenOption && Date.now() - lastSelectionTime < SELECTION_COOLDOWN) {
+    // Picking a different option than the current one is blocked while this
+    // question's penalty is running. Re-opening the current choice's feedback is not.
+    const isNewChoice = option.text !== chosenOption;
+    if (isNewChoice && remainingMs(questionNumber) > 0) {
       setNotifOperation("not-so-fast");
       setShowNotif(true);
       return;
     }
-
-    setLastSelectionTime(Date.now());
 
     setResponseInfo({
       responseType: option.responseType,
@@ -166,7 +168,9 @@ const fisherYates = (array) => {
 
     localStorage.setItem(`LQN${topicName}`,counter+1)
 
-    
+    if (isNewChoice && isWrongChoice(question, option)) {
+      startLock(questionNumber, getPenaltySeconds(question));
+    }
   };
 
   const handleSubmit = async () => {
@@ -215,6 +219,7 @@ const fisherYates = (array) => {
     await setDoc(docRef,{ inClass: false, inSession: false}, { merge: true });    
     localStorage.removeItem(`LQN${topicName}`)
     localStorage.removeItem('qNoArr')     
+    clearLocks()
       setNotifOperation("submit-answers");
       setShowNotif(true);
       setTimeout(() => {
@@ -277,6 +282,7 @@ const fisherYates = (array) => {
   if (!question) return (<div className="center_piece">There are no questions yet. </div>);
 
   const { additionalMediaType, additionalMediaLink } = question;
+  const lockMs = remainingMs(docSnap.id);
 
   return (
     <>
@@ -357,7 +363,10 @@ const fisherYates = (array) => {
             <li
               key={option.text}
               className="listItem"
-              style={{ cursor: "pointer" }}
+              style={{
+                cursor: lockMs > 0 && chosenOption !== option.text ? "not-allowed" : "pointer",
+                opacity: lockMs > 0 && chosenOption !== option.text ? 0.5 : 1,
+              }}
               onClick={() =>
                 handleClick(question, option, docSnap.id)
               }
@@ -374,6 +383,13 @@ const fisherYates = (array) => {
             </li>
           ))}
         </ul>
+
+        {lockMs > 0 && (
+          <PenaltyClock
+            remainingMs={lockMs}
+            totalSeconds={getPenaltySeconds(question)}
+          />
+        )}
       </div>
 
       {showModal && responseInfo && (
@@ -465,10 +481,3 @@ const fisherYates = (array) => {
     </>
   );
 };
-
-
-
-
-
-
-

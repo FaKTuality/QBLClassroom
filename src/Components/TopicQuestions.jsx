@@ -299,7 +299,7 @@ export const TopicQuestions = ( )=> {
                 { additionalMediaType === "image" && 
                   <img 
                     className="q-media centered" 
-                    src={additionalMediaLink} />}
+                    src={getDirectImageUrl(additionalMediaLink)} />}
 
             {additionalMediaType === "audio" && (() => {
               const audio = getAudioEmbed(additionalMediaLink);

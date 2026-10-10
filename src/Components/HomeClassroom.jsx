@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Notif } from "./Notif";
-import { parseCode, getAudioEmbed, getDirectImageUrl, getVideoEmbed } from "../Helpers";
+import { PenaltyClock } from "./PenaltyClock";
+import { usePenaltyLock } from "../Hooks";
+import {
+  parseCode,
+  getAudioEmbed,
+  getDirectImageUrl,
+  getVideoEmbed,
+  getPenaltySeconds,
+  isWrongChoice,
+} from "../Helpers";
 
 
 const DEMO_KEY_PREFIX = "demoClassroom";
+const DEMO_LOCK_KEY = `${DEMO_KEY_PREFIX}-locks`;
 const TOPIC_NAME = "Voltage"; // hardcode your topic display name here
 
 // Fill in your own sample questions here. Each item should look like:
@@ -13,8 +23,9 @@ const TOPIC_NAME = "Voltage"; // hardcode your topic display name here
 //   questionText: "...",
 //   additionalMediaType: "video" | "image" | "audio" | "",
 //   additionalMediaLink: "...",
+//   penaltyDelay: 5,   // seconds a student must wait after a wrong answer
 //   options: [
-//     { text: "...", responseType: "text" | "image" | "video" | "audio", responsePayload: "..." },
+//     { text: "...", responseType: "text" | "image" | "video" | "audio", responsePayload: "...", isCorrect: true | false },
 //     ...
 //   ]
 // }
@@ -24,26 +35,31 @@ const DEMO_QUESTIONS = [
     questionText: "What is a charge?",
     additionalMediaType: "",
     additionalMediaLink: "",
+    penaltyDelay: 5,
     options: [
       {
         text: "something that certain people have",
         responseType: "image",
         responsePayload: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTlqdnRzb2tocmxmaDFiNmJuNmZyanF4MzJxazR5azQwZGZ3ZzF2eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/JT7Td5xRqkvHQvTdEu/200w.webp",
+        isCorrect: false,
       },
       {
         text: "the amount of money that is charged for a product",
         responseType: "image",
         responsePayload: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTlqdnRzb2tocmxmaDFiNmJuNmZyanF4MzJxazR5azQwZGZ3ZzF2eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/JOEnREV2UXEyAMJ4BO/200.webp",
+        isCorrect: false,
       },
       {
         text: "electricity",
         responseType: "text",
         responsePayload: "you're not entirely wrong. A charge is related to electricity",
+        isCorrect: false,
       },
       {
         text: "a property of certain fundamental particles",
         responseType: "video",
         responsePayload: "https://youtu.be/YEReRb8rDCw?si=D_r5PQU1m7BFyf1h",
+        isCorrect: true,
       },      
     ],
   },
@@ -52,16 +68,19 @@ const DEMO_QUESTIONS = [
     questionText: "What is an electric field?",
     additionalMediaType: "image",
     additionalMediaLink: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/VFPt_charges_plus_minus_thumb.svg/500px-VFPt_charges_plus_minus_thumb.svg.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
+    penaltyDelay: 8,
     options: [
       {
         text: "an environment where an electric charge resides",
         responseType: "image",
         responsePayload: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTlqdnRzb2tocmxmaDFiNmJuNmZyanF4MzJxazR5azQwZGZ3ZzF2eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4OJFCEeGzYGs0/200w.webp",
+        isCorrect: false,
       },
       {
         text: "an open location where electricity is free",
         responseType: "image",
         responsePayload: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTlqdnRzb2tocmxmaDFiNmJuNmZyanF4MzJxazR5azQwZGZ3ZzF2eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xVIkfXYGTJeZKilg3p/200w.webp",
+        isCorrect: false,
       },
       {
         text: "a region around an electric charge, where another electric charge would experience an electric force",
@@ -69,11 +88,13 @@ const DEMO_QUESTIONS = [
         responsePayload: `Exactly! An electric field is what people call the SPACE around a particle that has a charge (in other words, a charged particle).
         Under a certain condition, a particle within this space will experience a force. The condition is that the particle must possess a charge itself (must be 
         a charged particle)`,
+        isCorrect: true,
       },
       {
         text: "a place where charging your phone is strictly forbidden",
         responseType: "image",
         responsePayload: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGxhYjdudWlsZno3ZGI1bDRxaWNqNXowOGswdm5rNWN6c2lnZ2R3cSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/6vdxQyAhN3QSva0cow/200w.webp",
+        isCorrect: false,
       },      
     ],
   },
@@ -89,26 +110,31 @@ amount of money transferred is the same as the balance of the recipient, if they
 amount of energy transferred is called work. So what is work?`,
     additionalMediaType: "image",
     additionalMediaLink: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Baseball_pitching_motion_2004.jpg/500px-Baseball_pitching_motion_2004.jpg?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
+    penaltyDelay: 10,
     options: [
       {
         text: "the amount of effort used to lift weight",
         responseType: "image",
         responsePayload: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExenc1NWcybnE3eTNkY2Z1dzluaTVidm40bmF5amo2MmlmMTFiOGZsYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/1zSz5MVw4zKg0/200.webp",
+        isCorrect: false,
       },
       {
         text: "a measure of the amount of energy transferred by an object to a force",
         responseType: "image",
         responsePayload: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExenc1NWcybnE3eTNkY2Z1dzluaTVidm40bmF5amo2MmlmMTFiOGZsYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/gnE4FFhtFoLKM/200w.webp",
+        isCorrect: false,
       },
       {
         text: "a measure of the amount of energy transferred by a force to an object",
         responseType: "image",
         responsePayload: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGxxMmZ6aWN2enJ2bWZqZmg2aDRhbzBwMDFtN2dpb2VtM3BsNHZ6diZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MNmyTin5qt5LSXirxd/200w.webp",
+        isCorrect: true,
       },
       {
         text: "a measure of the amount of energy transferred",
         responseType: "text",
         responsePayload: "Read the question again, carefully",
+        isCorrect: false,
       },      
     ],
   },
@@ -129,12 +155,13 @@ const fisherYates = (array) => {
   return shuffled;
 };
 
-// Wipes every demo answer key plus the demo question-order key.
+// Wipes every demo answer key plus the demo question-order key and penalty locks.
 const clearDemoStorage = (questions) => {
   questions.forEach((question) => {
     localStorage.removeItem(`${DEMO_KEY_PREFIX}-${question.id}-${TOPIC_NAME}`);
   });
   localStorage.removeItem(`${DEMO_KEY_PREFIX}-qNoArr`);
+  localStorage.removeItem(DEMO_LOCK_KEY);
 };
 
 export const DemoClassRoom = () => {
@@ -148,11 +175,10 @@ export const DemoClassRoom = () => {
   const [showNotif, setShowNotif] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [notifOperation, setNotifOperation] = useState("submit-answers");
+  const { startLock, remainingMs, clearLocks } = usePenaltyLock(DEMO_LOCK_KEY);
   const question = questions[counter];
   const lastIndex = questions.length - 1;
   const finalQuestion = counter === lastIndex;
-  const [lastSelectionTime, setLastSelectionTime] = useState(0);
-  const SELECTION_COOLDOWN = 5000;
 
   const bookmark = question
     ? localStorage.getItem(`${DEMO_KEY_PREFIX}-${question.id}-${TOPIC_NAME}`)
@@ -174,14 +200,18 @@ export const DemoClassRoom = () => {
 
   const closeModal = () => setShowModal(false);
 
+  const lockMs = remainingMs(question.id);
+
   const handleClick = (question, option) => {
-    if (option.text !== chosenOption && Date.now() - lastSelectionTime < SELECTION_COOLDOWN) {
+    // Picking a different option than the current one is blocked while this
+    // question's penalty is running. Re-opening the current choice's feedback is not.
+    const isNewChoice = option.text !== chosenOption;
+    if (isNewChoice && remainingMs(question.id) > 0) {
       setNotifOperation("not-so-fast");
       setShowNotif(true);
       return;
     }
 
-    setLastSelectionTime(Date.now());    
     setResponseInfo({
       responseType: option.responseType,
       responsePayload: option.responsePayload,
@@ -199,6 +229,10 @@ export const DemoClassRoom = () => {
       `${DEMO_KEY_PREFIX}-${question.id}-${TOPIC_NAME}`,
       JSON.stringify(answeredQuestion)
     );
+
+    if (isNewChoice && isWrongChoice(question, option)) {
+      startLock(question.id, getPenaltySeconds(question));
+    }
   };
 
   const handleSubmit = () => {
@@ -212,6 +246,7 @@ export const DemoClassRoom = () => {
     setSubmitting(true);
 
     clearDemoStorage(questions);
+    clearLocks();
     setNotifOperation("submit-answers");
     setShowNotif(true);
     setTimeout(() => {
@@ -313,7 +348,10 @@ export const DemoClassRoom = () => {
             <li
               key={option.text}
               className="listItem"
-              style={{ cursor: "pointer" }}
+              style={{
+                cursor: lockMs > 0 && chosenOption !== option.text ? "not-allowed" : "pointer",
+                opacity: lockMs > 0 && chosenOption !== option.text ? 0.5 : 1,
+              }}
               onClick={() => handleClick(question, option)}
             >
               <span
@@ -326,6 +364,13 @@ export const DemoClassRoom = () => {
             </li>
           ))}
         </ul>
+
+        {lockMs > 0 && (
+          <PenaltyClock
+            remainingMs={lockMs}
+            totalSeconds={getPenaltySeconds(question)}
+          />
+        )}
       </div>
 
       {showModal && responseInfo && (

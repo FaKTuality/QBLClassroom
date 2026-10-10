@@ -830,6 +830,9 @@ ul {
   gap: 10px; 
 }
 
+
+
+
 .label-input-pair-vertical, .flex-vert { 
   display: flex; 
   flex-direction: column;

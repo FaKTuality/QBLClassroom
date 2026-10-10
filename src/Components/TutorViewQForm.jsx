@@ -1,7 +1,5 @@
-
 import { Form, Formik } from "formik";
 import { Field } from "formik";
-import * as Yup from 'yup'; 
 import { useSelector } from "react-redux";
 import { FieldArray } from "formik";
 import { ErrorMessage } from "formik";
@@ -15,7 +13,17 @@ import { Notif } from "./Notif";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTopicChange, useNameChange } from "../Hooks";
 import { useFormikContext } from "formik";
-import { errorMessages, parseTopic, parseCode } from "../Helpers/index.jsx";
+import {
+  errorMessages,
+  parseTopic,
+  parseCode,
+  createEmptyOption,
+  createEmptyQuestion,
+  normalizeQuestion,
+  markCorrectOption,
+  questionValidationSchema,
+  MAX_PENALTY_DELAY,
+} from "../Helpers/index.jsx";
 
 const DraftAutosave = () => {
   const { values } = useFormikContext();
@@ -146,7 +154,8 @@ const resolveGiphyVideoUrl = async (url) => {
           : option
       )
     );
-    const finalValues = { ...newValues, options: resolvedOptions };
+    // The number input hands Formik a string, so store penaltyDelay as a real number.
+    const finalValues = { ...newValues, penaltyDelay: Number(newValues.penaltyDelay), options: resolvedOptions };
 
     const saveQuestion = async (questionNumber) => { 
       let docRef; 
@@ -159,18 +168,7 @@ const resolveGiphyVideoUrl = async (url) => {
     }
     
       await saveQuestion(questionNumber)
-      isEditing ? resetForm({ values: {
-          additionalMediaType: "",
-          additionalMediaLink: "",
-          questionText: "",
-          options: [
-          {
-            text: "",
-            responseType: "",
-            responsePayload: ""
-          }
-          ]
-        }}) : resetForm();
+      isEditing ? resetForm({ values: createEmptyQuestion() }) : resetForm();
         
       if(isEditing) { 
           setShowNotif2(true);     
@@ -198,44 +196,13 @@ const resolveGiphyVideoUrl = async (url) => {
     }
   }
 
-  const validationSchema = Yup.object().shape({
-      additionalMediaType: Yup.string(), 
-      additionalMediaLink: Yup.string().when("additionalMediaType", {
-        is: (additionalMediaType) => !!additionalMediaType, 
-        then: (schema) => schema.required('Please provide a link to the additional media'), 
-        otherwise: (schema) => schema.notRequired() 
-      }),
-      questionText: Yup.string().required('please enter a question'), 
-      options: Yup.array().of(Yup.object({
-        text: Yup.string().required('please enter a response'), 
-        responseType: Yup.string().required('please choose a response type'), 
-        responsePayload: Yup.string().required('please enter a response text or link'), 
-      }
-      )).min(2, "A question must have at least two options")
-    }
-  )
-
 const draftValues = !questionData
   ? JSON.parse(localStorage.getItem('questionDraft') || 'null')
   : null;
- 
-let initialValues = questionData || {
-  additionalMediaType: draftValues?.additionalMediaType || "",
-  additionalMediaLink: draftValues?.additionalMediaLink || "",
-  questionText: draftValues?.questionText || "",
-  options: draftValues?.options || [
-    {
-      text: "",
-      responseType: "",
-      responsePayload: ""
-    }
-  ]
-};
-const optionCreator = () => ({
-      text: "",
-      responseType: "",
-      responsePayload: ""
-    })
+
+// normalizeQuestion fills in isCorrect / penaltyDelay for questions and drafts
+// saved before those fields existed, so every input stays controlled.
+const initialValues = normalizeQuestion(questionData || draftValues);
 
 const handleRemove = (remove, optionIndex) => {
   remove(optionIndex); 
@@ -243,7 +210,11 @@ const handleRemove = (remove, optionIndex) => {
 
 const handleAdd = (setFieldValue, fieldPath, values) => {
 
-  setFieldValue(fieldPath, [...values.options, optionCreator()] )
+  setFieldValue(fieldPath, [...values.options, createEmptyOption()] )
+}
+
+const handleMarkCorrect = (setFieldValue, values, optionIndex) => {
+  setFieldValue("options", markCorrectOption(values.options, optionIndex))
 }
 
   return (
@@ -264,7 +235,7 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
     <Formik
     
     initialValues={initialValues}
-    validationSchema={validationSchema}
+    validationSchema={questionValidationSchema}
     validateOnChange
     onSubmit={handleSubmit}>
       {({ values, setFieldValue, isSubmitting, status, errors }) => 
@@ -323,6 +294,24 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
               />
 
           </div>     
+
+          <div className="label-input-pair-vertical">
+            <label htmlFor="penaltyDelay">Wrong-answer delay (seconds)</label>
+            <Field
+              name="penaltyDelay"
+              id="penaltyDelay"
+              type="number"
+              min="0"
+              max={MAX_PENALTY_DELAY}
+              step="1"
+              className="textInput"
+            />
+          </div>
+          <ErrorMessage
+            name="penaltyDelay"
+            component="div"
+            className="error-message"/>
+
           <div >
             <FieldArray name="options">
               {({remove}) => 
@@ -384,6 +373,19 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
                           />
                       </div>
 
+                      <div className="label-input-pair-vertical">
+                        <label className="label-input-pair" htmlFor={`options.${optionIndex}.isCorrect`}>
+                          <input
+                            className="checkbox"
+                            type="checkbox"
+                            id={`options.${optionIndex}.isCorrect`}
+                            checked={!!option.isCorrect}
+                            onChange={() => handleMarkCorrect(setFieldValue, values, optionIndex)}
+                          />
+                          {" "}Correct
+                        </label>
+                      </div>
+
                       <div className="remove" onClick={() => {handleRemove(remove, optionIndex)}}>Remove</div> 
                     </div>
                     
@@ -434,4 +436,4 @@ const handleAdd = (setFieldValue, fieldPath, values) => {
     </small>    
     </div>
   )
-}  
+}
