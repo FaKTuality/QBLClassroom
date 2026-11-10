@@ -38,12 +38,13 @@ export const TutorDashboard = () => {
       const docRef = doc(db, `admin/${tutorId}`)
       
       const docSnap = await getDoc(docRef); 
-      const { inviteDoc, displayName: tutorName }   = docSnap.data()
+      const { inviteDoc, displayName: tutorName }   = docSnap.data() || {}
       
       setTutorName(tutorName)
       setInviteDoc(inviteDoc); 
       localStorage.removeItem("topicConfig")
       } catch(e) {
+        console.log(e)
         setError(
           !navigator.onLine
             ? "You're currently offline. Please reconnect to the internet and try again."

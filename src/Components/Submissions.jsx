@@ -116,30 +116,46 @@ export const Submissions = () => {
             <div className="q-number">
                {`question ${parseInt(questionNumber?.slice(8), 10)}`}
             </div>
+            {additionalMediaType === "video" && (() => {
+              const video = getVideoEmbed(additionalMediaLink);
+              if (!video) return null;
 
-            {additionalMediaType === "audio" && (
-              <audio
-                className="q-media"
-                src={additionalMediaLink}
-                controls
-              />
-            )}
+              return video.type === "iframe" ? (
+                <iframe
+                  className="media-iframe-video"
+                  src={video.url}
+                  title="Video player"
+                  frameBorder="0"
+                />
+              ) : (
+                <video
+                  className="media-video"
+                  src={video.url}
+                  controls
+                />
+              );
+            })()} 
 
-            {additionalMediaType === "video" && (
-              <video
-                className="q-media"
-                src={additionalMediaLink}
-                controls
-              />
-            )}
+                { additionalMediaType === "image" && 
+                  <img 
+                    className="q-media centered" 
+                    src={getDirectImageUrl(additionalMediaLink)} />}
 
-            {additionalMediaType === "image" && (
-              <img
-                className="q-media"
-                src={additionalMediaLink}
-                alt="Question media"
-              />
-            )}
+            {additionalMediaType === "audio" && (() => {
+              const audio = getAudioEmbed(additionalMediaLink);
+              if (!audio) return null;
+
+              return audio.type === "iframe" ? (
+                <iframe
+                  className="media-iframe-audio"
+                  src={audio.url}
+                  title="Audio player"
+                  frameBorder="0"
+                />
+              ) : (
+                <audio className="media-audio" src={audio.url} controls />
+              );
+            })()}
 
             <p className="q-text">
               {parseCode(questionText)}

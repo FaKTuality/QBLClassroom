@@ -68,9 +68,11 @@ export const ProtRoutes = (Component) => () => {
         
         if(window.location.pathname.match(/^(\/navtut)/)?.[0] && role !== 'tutor'){
           navigate('/accessrestricted')
+          console.log('not allowed')
           
         } else if(window.location.pathname.match(/^(\/navstu)/)?.[0] && role !== 'student'){
           navigate('/accessrestricted')
+          console.log('not allowed2')
           
         } else {
          console.log("I'm setting valid to true")
@@ -87,15 +89,20 @@ export const ProtRoutes = (Component) => () => {
 
     }
 
-    if(!user || !auth.currentUser?.emailVerified) {
-      navigate('/navauth/signin')
-    }
+const isGitHubUser = user?.providerData.some(
+  provider => provider.providerId === "github.com"
+);
 
-    if(auth.currentUser?.emailVerified){
-      console.log("I'm fetching user")
-      fetchUser()      
-    }
-    
+if (!user || (!auth.currentUser?.emailVerified && !isGitHubUser)) {
+  console.log("you're not emailVerified bro");
+  navigate('/navauth/signin');
+  return;
+}
+
+if (auth.currentUser?.emailVerified || isGitHubUser) {
+  console.log("I'm fetching user");
+  fetchUser();
+}
 
   }, [user, navigate, authLoading])
 
