@@ -10,7 +10,7 @@ import { useAuth } from "../store/authProvider";
 import { RevolvingDot } from "react-loader-spinner";
 import { errorMessages } from "../Helpers/index.jsx";
 import { AddTopicConfig } from "./AddTopicConfig.jsx";
-
+import { FaPlus } from "react-icons/fa";
 
 
 export const TutorDashboard = () => {
@@ -131,7 +131,7 @@ export const TutorDashboard = () => {
       </div>
       
       <div className="listItem">
-        <p onClick={handleAddTopic} className="button">Add Topic</p>
+        <p onClick={handleAddTopic} className="button"><FaPlus size={10} color="orange"/> &nbsp; Topic</p>
         <img src="../addTopic.webp" alt="this image cannot be displayed" className="add-topic"/>
         <img src="../addTopicMobile.webp" alt="this image cannot be displayed" 
         className="add-topic-mobile"/>        
