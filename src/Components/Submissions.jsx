@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { RevolvingDot } from "react-loader-spinner";
 import { db } from "../../Firebase/index.js";
 import { useNameChange, useTopicChange  } from "../Hooks";
-import { errorMessages, parseName, parseTopic, parseCode } from "../Helpers/index.jsx";
+import { errorMessages, parseName, parseTopic, parseCode, getDirectImageUrl } from "../Helpers/index.jsx";
 
 
 export const Submissions = () => {
