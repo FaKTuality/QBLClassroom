@@ -188,34 +188,49 @@ const startTimer2 = () => {
     });
   }, 1000);
 };
-  const handleVerif = async () => {
+
+
+const handleVerif = async () => {
     setVerifying(true); 
     setError(null); 
     
     try {
-        const promises = await Promise.all([reload(auth.currentUser), getDoc(doc(db, "persistentInfo", auth.currentUser.uid))])
-        const { name, inviteDoc } = promises[1].data() || {} 
-    
+      
+      await reload(auth.currentUser);
 
-      if(auth.currentUser.emailVerified) {
+      const isVerified = auth.currentUser.emailVerified;
+      
+
+      const hasOtherProvider = auth.currentUser.providerData.some(
+        (provider) => provider.providerId !== "password"
+      );
+
+      if (isVerified && hasOtherProvider) {
+        
+        console.log('User is verified and has another provider. Logging in...');
+        await routeUser(auth.currentUser.uid);
+      } 
+      else if (isVerified) {
+        
+        const docSnap = await getDoc(doc(db, "persistentInfo", auth.currentUser.uid));
+        const { name, inviteDoc } = docSnap.data() || {};
+
         if (inviteDoc) {
           await createStudent(auth.currentUser, name, inviteDoc);
-          
         } else {
           await createTutor(auth.currentUser, name);
-          
         }
-      } else {
+      } 
+      else {
         setError("Please verify your email first.");
-        return;
       }
     } catch (error) {  
-      console.error(error)
+      console.error(error);
       setError(error.message);
     } finally {
       setVerifying(false); 
     }
-  };  
+  };
 
   const handleReset = async (values, { setStatus, setSubmitting }) => {
     setStatus(null);
